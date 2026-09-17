@@ -1,0 +1,37 @@
+[
+ {
+  "slug": "01-dashboard",
+  "title": "Übersicht (Dashboard)",
+  "screenId": "23f441075d104848868ac3086da4a55d",
+  "w": "2560",
+  "h": "2048"
+ },
+ {
+  "slug": "02-upload",
+  "title": "Beleg hochladen (Upload)",
+  "screenId": "2daa6835636543e2923d3c5f3c1df1b3",
+  "w": "2560",
+  "h": "2480"
+ },
+ {
+  "slug": "03-review",
+  "title": "Beleg prüfen (Review)",
+  "screenId": "b6081f967a364feca74d38531526e2d1",
+  "w": "2560",
+  "h": "2048"
+ },
+ {
+  "slug": "04-list",
+  "title": "Belege (Listenansicht)",
+  "screenId": "8018e5909d3a492194d7cad880256d81",
+  "w": "2560",
+  "h": "2048"
+ },
+ {
+  "slug": "05-export",
+  "title": "Export (3-Schritt-Wizard)",
+  "screenId": "89e2f4e0683149339edeff0a7b8a7205",
+  "w": "2560",
+  "h": "2048"
+ }
+]

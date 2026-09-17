@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Belegio – Belegarchiv</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "error-container": "#ffdad6",
+            "on-background": "#131b2e",
+            "on-secondary-fixed-variant": "#224e47",
+            "surface": "#faf8ff",
+            "outline": "#6e7977",
+            "surface-tint": "#006a63",
+            "inverse-primary": "#80d5cb",
+            "tertiary-container": "#007a33",
+            "on-secondary-fixed": "#00201c",
+            "surface-container": "#eaedff",
+            "tertiary-fixed": "#7ffc97",
+            "error": "#ba1a1a",
+            "on-surface": "#131b2e",
+            "on-tertiary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00504a",
+            "on-surface-variant": "#3e4947",
+            "secondary-fixed": "#bdece2",
+            "on-tertiary-fixed-variant": "#005320",
+            "secondary-container": "#bdece2",
+            "primary-fixed-dim": "#80d5cb",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#bdc9c6",
+            "tertiary": "#005f26",
+            "on-tertiary-container": "#a1ffad",
+            "primary-container": "#0f766e",
+            "secondary": "#3b665f",
+            "on-secondary-container": "#416c65",
+            "on-primary-fixed": "#00201d",
+            "surface-bright": "#faf8ff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e2e7ff",
+            "surface-variant": "#dae2fd",
+            "on-primary": "#ffffff",
+            "secondary-fixed-dim": "#a2d0c6",
+            "surface-dim": "#d2d9f4",
+            "on-primary-container": "#a3faef",
+            "inverse-surface": "#283044",
+            "primary": "#005c55",
+            "on-secondary": "#ffffff",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "inverse-on-surface": "#eef0ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#62df7d",
+            "background": "#faf8ff",
+            "primary-fixed": "#9cf2e8"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "gutter": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.75rem",
+            "margin": "2rem",
+            "space-xl": "2rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          fontFamily: {
+            "numeric-data": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          fontSize: {
+            "numeric-data": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "body-lg": ["15px", { lineHeight: "22px", fontWeight: "400" }],
+            "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-md": ["20px", { lineHeight: "28px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-md": ["14px", { lineHeight: "20px", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="h-full text-on-surface bg-surface antialiased flex">
+<!-- Fixed Left Sidebar (SideNavBar) -->
+<aside class="fixed top-0 left-0 h-screen w-60 z-30 bg-surface-container-lowest border-r border-outline-variant shadow-sm flex flex-col justify-between p-4">
+<div class="flex flex-col gap-6">
+<!-- Header / Logo -->
+<div class="flex items-center gap-3 px-2 py-1">
+<div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</div>
+<div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary tracking-tight leading-none">Belegio</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">GoBD-konform &amp; Lokal</p>
+</div>
+</div>
+<!-- Navigation tabs -->
+<nav aria-label="Hauptnavigation" class="flex flex-col gap-1.5">
+<!-- Übersicht -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-outline" data-icon="dashboard">dashboard</span>
+<span>Übersicht</span>
+</a>
+<!-- Beleg hochladen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-outline" data-icon="upload_file">upload_file</span>
+<span>Beleg hochladen</span>
+</a>
+<!-- Belege (ACTIVE STATE STRICT LOCK) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container text-on-secondary-container font-label-md text-label-md border-l-2 border-primary" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-semibold text-primary">Belege</span>
+</a>
+<!-- Export -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-outline" data-icon="ios_share">ios_share</span>
+<span>Export</span>
+</a>
+<!-- Einstellungen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-outline" data-icon="settings">settings</span>
+<span>Einstellungen</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sidebar Section & Privacy Seal -->
+<div class="flex flex-col gap-3">
+<div class="px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant/50">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant mb-1">
+<span>OCR-Speicher</span>
+<span class="font-numeric-data text-numeric-data text-primary">37 / 500</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 7.4%"></div>
+</div>
+</div>
+<!-- Mandatory Privacy Stamp from JSON -->
+<div class="flex items-center gap-2 px-3 py-2 rounded-full bg-secondary-fixed/40 border border-primary/20 text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm" data-icon="lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>100% lokal verarbeitet</span>
+</div>
+</div>
+</aside>
+<!-- Top Navigation Bar (TopNavBar) -->
+<header class="fixed top-0 left-60 right-0 h-16 z-20 bg-surface-container-lowest border-b border-outline-variant shadow-sm flex items-center justify-between px-6">
+<!-- Left: OCR Search Bar -->
+<div class="flex items-center w-96">
+<div class="relative w-full">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+</span>
+<input class="w-full pl-9 pr-4 py-1.5 text-body-md font-body-md rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-outline text-sm" placeholder="Schnellsuche (OCR Volltext, z. B. MwSt-ID, Betrag)..." type="text"/>
+</div>
+</div>
+<!-- Right: Trailing Actions, Export Action and User Profile -->
+<div class="flex items-center gap-4">
+<button class="p-2 text-outline hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" title="Benachrichtigungen" type="button">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-outline hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" title="Hilfe &amp; GoBD-Leitfaden" type="button">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- Trailing Primary Action: Export -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-base" data-icon="ios_share">ios_share</span>
+<span>Export</span>
+</button>
+<!-- Profile Container -->
+<div class="flex items-center gap-2.5 pl-1 cursor-pointer">
+<div class="relative">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-semibold text-sm border border-outline-variant">
+            BK
+          </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-tertiary-container rounded-full ring-2 ring-surface-container-lowest" title="Online Status"></span>
+</div>
+<div class="hidden lg:flex flex-col">
+<span class="text-label-md font-label-md font-medium text-on-surface leading-tight">Batuhan K.</span>
+<span class="text-label-sm font-label-sm text-outline leading-tight">Freiberufler</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-60 pt-16 flex-1 min-h-screen bg-surface p-8 overflow-y-auto">
+<div class="max-w-7xl mx-auto flex flex-col gap-6">
+<!-- Header Row: Title & Action Buttons -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Belegarchiv</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-medium">37 Belege</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mt-0.5">Vollständig revisionssicher und revisionskonform nach GoBD strukturiert.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-colors shadow-sm active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="drive_folder_upload">drive_folder_upload</span>
+<span>Stapel-Upload</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md transition-colors shadow-sm active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+<span>Neuer Beleg</span>
+</button>
+</div>
+</div>
+<!-- Filters & Controls Bar -->
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col gap-3.5">
+<!-- Top row: Search, Date Range, Category, VAT and View Switcher -->
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-3 flex-1">
+<!-- Search field -->
+<div class="relative min-w-[260px] flex-1 max-w-sm">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-base" data-icon="search">search</span>
+</span>
+<input class="w-full pl-9 pr-3 py-1.5 text-body-md font-body-md rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm placeholder:text-outline" placeholder="Nach Händler, Notiz oder Betrag suchen..." type="text"/>
+</div>
+<!-- Date range picker -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-label-md font-label-md hover:bg-surface-container-low cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-outline text-base" data-icon="calendar_today">calendar_today</span>
+<span class="font-numeric-data text-numeric-data">01.09.2026 – 30.09.2026</span>
+<span class="material-symbols-outlined text-outline text-sm ml-1" data-icon="expand_more">expand_more</span>
+</div>
+<!-- Category Multiselect -->
+<div class="relative">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-label-md font-label-md hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-outline text-base" data-icon="folder_open">folder_open</span>
+<span>Kategorien</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-xs font-semibold text-primary">3</span>
+<span class="material-symbols-outlined text-outline text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- VAT / MwSt filter dropdown -->
+<div class="relative">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-label-md font-label-md hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-outline text-base" data-icon="percent">percent</span>
+<span>MwSt: Alle</span>
+<span class="material-symbols-outlined text-outline text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Right: View Mode Toggle -->
+<div class="flex items-center p-1 bg-surface-container-low rounded-lg border border-outline-variant/60">
+<button class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container-lowest shadow-sm text-primary font-label-sm text-label-sm font-semibold" title="Tabellenansicht (Aktiv)" type="button">
+<span class="material-symbols-outlined text-base" data-icon="view_list">view_list</span>
+<span>Tabelle</span>
+</button>
+<button class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm transition-colors" title="Galerie-/Grid-Ansicht" type="button">
+<span class="material-symbols-outlined text-base" data-icon="grid_view">grid_view</span>
+<span>Galerie</span>
+</button>
+</div>
+</div>
+<!-- Bottom row: Status Pills & Reset Filter -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline-variant/40">
+<div class="flex items-center gap-2">
+<!-- Alle -->
+<button class="px-3 py-1 rounded-full text-label-sm font-label-sm bg-surface-container-highest text-on-surface font-semibold hover:bg-surface-container-high transition-colors" type="button">
+              Alle (37)
+            </button>
+<!-- Geprüft -->
+<button class="flex items-center gap-1 px-3 py-1 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-700 border border-emerald-200/80 hover:bg-emerald-100/70 transition-colors" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>Geprüft (32)</span>
+</button>
+<!-- Zu prüfen -->
+<button class="flex items-center gap-1 px-3 py-1 rounded-full text-label-sm font-label-sm bg-amber-50 text-amber-700 border border-amber-200/80 hover:bg-amber-100/70 transition-colors" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>Zu prüfen (5)</span>
+</button>
+</div>
+<button class="flex items-center gap-1 text-label-sm font-label-sm text-primary hover:underline transition-all" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="filter_alt_off">filter_alt_off</span>
+<span>Filter zurücksetzen</span>
+</button>
+</div>
+</div>
+<!-- Bulk Action Banner (Visible for Selected Rows) -->
+<div class="flex flex-wrap items-center justify-between px-4 py-2.5 rounded-xl bg-secondary-container/50 border border-secondary-fixed text-on-secondary-fixed shadow-sm animate-fadeIn">
+<div class="flex items-center gap-3">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-bold">3</span>
+<span class="font-label-md text-label-md font-semibold text-primary">3 Belege ausgewählt</span>
+<span class="text-outline text-xs">| Summe: 219,79 €</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-sm font-label-sm font-medium transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-base" data-icon="label">label</span>
+<span>Kategorie ändern</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-sm font-label-sm font-medium transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-base" data-icon="task_alt">task_alt</span>
+<span>Als geprüft markieren</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low text-label-sm font-label-sm font-medium transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-base" data-icon="ios_share">ios_share</span>
+<span>Exportieren (Auswahl)</span>
+</button>
+<button class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-error-container text-on-error-container hover:bg-error-container/80 text-label-sm font-label-sm font-medium transition-colors" type="button">
+<span class="material-symbols-outlined text-base" data-icon="delete">delete</span>
+<span>Löschen</span>
+</button>
+</div>
+</div>
+<!-- Data Table Card Container -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="h-12 bg-surface-container-low/70 border-b border-outline-variant text-label-sm font-label-sm text-outline tracking-wider">
+<th class="pl-4 pr-2 w-10" scope="col">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" title="Alle wählen" type="checkbox"/>
+</th>
+<th class="px-2 w-14 text-center" scope="col">Vorschau</th>
+<th class="px-3 min-w-[190px]" scope="col">Händler</th>
+<th class="px-3 min-w-[110px]" scope="col">Datum</th>
+<th class="px-3 min-w-[140px]" scope="col">Kategorie</th>
+<th class="px-3 min-w-[80px] text-right" scope="col">MwSt-Satz</th>
+<th class="px-3 min-w-[110px] text-right" scope="col">Netto</th>
+<th class="px-3 min-w-[110px] text-right" scope="col">Brutto</th>
+<th class="px-3 min-w-[130px]" scope="col">Status</th>
+<th class="pr-4 pl-2 w-12 text-center" scope="col">Aktionen</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/40 text-body-md font-body-md text-on-surface">
+<!-- Row 1: REWE (Checked) -->
+<tr class="h-14 hover:bg-surface-container-low/60 transition-colors bg-secondary-fixed/15 border-l-2 border-primary">
+<td class="pl-4 pr-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A clean top-down photographic scan of a German grocery receipt from REWE with clear itemized rows, clean crisp paper texture, softly lit in a minimalist fintech aesthetic with muted white and neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIwHn-6edWYNPjBG_G57Kwo3FoeKS1r3v4uPV9cw1nEU7Q4CiESF-vpIsF9Dxeic0zocPD_gb_9k9g3WW1c2fC67nUIOq3rNIczinWX5AdOstnm6CkO5L8dgwVDkVoZ5ZarpXjsGQqHq1Ryx2AlGUiLYFGrq4iCgmMiT0NJZyG4IcsNR2GhoLBudUd9JSjAVRSdfGcqHFKFeAFHfk_nkVymglqkhkgpnsHOSZubUZruPXbyauvgsMIdA"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">REWE Markt GmbH</span>
+<span class="text-xs text-outline font-numeric-data">Köln Filiale 104 • Bewirtung</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">12.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+<span>Bürobedarf</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">7%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">41,85 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">44,78 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Geprüft</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Deutsche Bahn AG (Checked) -->
+<tr class="h-14 hover:bg-surface-container-low/60 transition-colors bg-secondary-fixed/15 border-l-2 border-primary">
+<td class="pl-4 pr-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A modern electronic train ticket PDF from Deutsche Bahn with barcode and traveler details laid flat against a neutral studio backdrop with high-key professional workspace lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_yH3oTk4Q-f1wfDkv5WGwb5RyiNWVzXCh9uJGKyADnUyQaORE5UhRktEUhu0lYsO41jheQR35NnMjYVyDE41hDm4EMVjCru0Emk5y-gRk2nZ_IDZENPGShGXJNInKrig7KICPeXBZGOiYSkmeV3_wjdF4cGMdYCmhRqYWLhon_tSLm6uoLa2WY6zjXpB-WsND8ftG28xsbsGX1NouamWHQWdwldolJrmOpDTnVdGeBFUe0QqSix9lsw"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Deutsche Bahn AG</span>
+<span class="text-xs text-outline font-numeric-data">ICE Berlin - Frankfurt • Hinfahrt</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">10.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>Reise</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">7%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">119,75 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">128,13 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Geprüft</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Figma Inc. (Checked) -->
+<tr class="h-14 hover:bg-surface-container-low/60 transition-colors bg-secondary-fixed/15 border-l-2 border-primary">
+<td class="pl-4 pr-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A clean international SaaS invoice document from Figma Inc. showing VAT reverse charge notation, crisp corporate typography on an immaculate white digital document surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-QPu4ywWUVd3A8sIgdF2BaC9d60UliH3tKnPESPumKBuwnGFC1a1_jkBh_CPhIvoMjaMEESmGym3-BNs7ms-vf199LPkwjZKwTQolFXr08qc4YCZkSVVlQV197Eb8580Bm8O2Yy4UQwuJndX4y3dWOhtFKjL--AGpW88GyzzTevp5R4yQWpyd2YEM7WqxoZhhOU7RJ78mrY81hqyX-Vukz8wGF9Oou4G_-sUIDRJc6zQ0frNAmLwfhg"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Figma Inc.</span>
+<span class="text-xs text-outline font-numeric-data">Monatsabo Professional • US-Reverse Charge</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">08.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+<span>Software</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">19%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">15,00 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">17,85 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Geprüft</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Telekom Deutschland (Unchecked - Zu prüfen) -->
+<tr class="h-14 hover:bg-surface-container-low transition-colors">
+<td class="pl-4 pr-2">
+<input class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A telecommunications invoice page with table lines, crisp German service provider layout, well structured with clean light mode aesthetics and high contrast text." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu8cPpgI6pdcoReegO7j41nuI9Sk8pIxoda2q7hxHD1ttkh-llJ9JozAVcMOm6QU8yz1NQN6VU9OAbWrl3tkMP7uXXdNU0hi1N3CgrLAr_41Fpy3nApSJYSA6C1kl3DRT4Evk1F9s_YAA21g70LaO_Wb9Yb71_aE2KLnf0vKGisq0LTGTSvfyJ6blnXFwJ39gjL1Lb1ZBM-X7quqrm0BYD8VExCwPmSurr4RXKqTYM8a04z6JrkrgVwg"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Telekom Deutschland GmbH</span>
+<span class="text-xs text-outline font-numeric-data">Business Glasfaser 250 • Sept 2026</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">04.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-50 text-cyan-700 border border-cyan-200">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+<span>Telekommunikation</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">19%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">49,99 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">59,49 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+<span class="material-symbols-outlined text-xs" data-icon="warning">warning</span>
+<span>Zu prüfen</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Apple Distribution International -->
+<tr class="h-14 hover:bg-surface-container-low transition-colors">
+<td class="pl-4 pr-2">
+<input class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A minimalist Apple invoice receipt showing digital service fees, iCloud business subscription layout, photographed cleanly in an ultra modern bright workspace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA58GnDIcZ-rqx3W8lgcIJPw7UE99dxggwD5iI5STWAgACbIe9D83VDGO5dNaBhi4yQJIa8JTmNLAwxI-wzX9pu9SJ-6H0tgg5W3QWqOOklAelyWOpiPccquoIQmAFz_UGIwX0TmPfRz8cNdIIiMUMit9vjJKptZwLC_0EbmwUkIqb2NmBRveBQ4WegQUiF1Nng1f2O3UcAf8d8AGs7tpgMEAjDpr2iIsJkELQunuqpW4GuVeUHELxvMw"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Apple Distribution Int.</span>
+<span class="text-xs text-outline font-numeric-data">iCloud+ 2TB &amp; Developer Program</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">02.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+<span>Software</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">19%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">9,99 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">11,89 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Geprüft</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Coworking Space Betreiber (Zu prüfen) -->
+<tr class="h-14 hover:bg-surface-container-low transition-colors">
+<td class="pl-4 pr-2">
+<input class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td class="px-2">
+<div class="relative group w-9 h-11 mx-auto rounded border border-outline-variant overflow-hidden bg-surface-container cursor-pointer shadow-xs">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="A crisp printed workspace rental invoice from a German coworking hub with company stamp, clear line items and tax breakdown, rendered in a bright architectural setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV1JBvPj21Wdu8ukAo6tH-1EVruNclclIVTxDfUi74w3q7XTwQgOPmKzCGAQpeSkUSgzzYUdyKRnN0-DSEL5nvHs27_QqK-QtNlAanqxOYGeLHxINVwhX8VGcyrUP_wXWnLu06UzRUKX2iQ7YcJ1dC0QhXwacQix06AJcEOJvQsLjhgk8mq82KEwzYgqP3_gzsahIk7z0vHHH-5wE0BLzEcdQQsbXN8_AZeGILFNHwssPrdhSn72V7SQ"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-sm" data-icon="zoom_in">zoom_in</span>
+</div>
+</div>
+</td>
+<td class="px-3">
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Betahaus Berlin GmbH</span>
+<span class="text-xs text-outline font-numeric-data">Flex Desk Monatstarif September</span>
+</div>
+</td>
+<td class="px-3 text-on-surface-variant font-numeric-data text-numeric-data">01.09.2026</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+<span>Bürobedarf</span>
+</span>
+</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data text-on-surface-variant">19%</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data tabular-nums">250,00 €</td>
+<td class="px-3 text-right font-numeric-data text-numeric-data font-semibold tabular-nums text-on-surface">297,50 €</td>
+<td class="px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+<span class="material-symbols-outlined text-xs" data-icon="warning">warning</span>
+<span>Zu prüfen</span>
+</span>
+</td>
+<td class="pr-4 pl-2 text-center">
+<button class="p-1 rounded text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Optionen" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Summary Row / Summenzeile -->
+<div class="bg-surface-container-low px-6 py-3 border-t border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base" data-icon="account_balance_wallet">account_balance_wallet</span>
+<div class="text-body-sm font-body-sm text-on-surface-variant">
+<span class="font-medium text-on-surface">Auswahl / Seite:</span>
+<span class="ml-2 font-numeric-data text-numeric-data">Netto: <strong class="text-on-surface">1.836,78 €</strong></span>
+<span class="mx-1.5 text-outline">|</span>
+<span class="font-numeric-data text-numeric-data">MwSt: <strong class="text-on-surface">348,12 €</strong></span>
+<span class="mx-1.5 text-outline">|</span>
+<span class="font-numeric-data text-numeric-data">Gesamt Brutto: <strong class="text-primary font-semibold">2.184,90 €</strong></span>
+</div>
+</div>
+<!-- Pagination Controls -->
+<div class="flex items-center gap-4 self-end md:self-auto">
+<span class="text-label-sm font-label-sm text-on-surface-variant font-numeric-data">
+              Zeige <span class="font-semibold text-on-surface">1–10</span> von <span class="font-semibold text-on-surface">37</span> Belegen
+            </span>
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-md border border-outline-variant text-outline hover:text-on-surface hover:bg-surface-container-lowest transition-colors disabled:opacity-40" disabled="" title="Vorherige Seite" type="button">
+<span class="material-symbols-outlined text-base" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center" type="button">1</button>
+<button class="w-8 h-8 rounded-md border border-transparent text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors" type="button">2</button>
+<button class="w-8 h-8 rounded-md border border-transparent text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors" type="button">3</button>
+<button class="w-8 h-8 rounded-md border border-transparent text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors" type="button">4</button>
+<button class="p-1.5 rounded-md border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors" title="Nächste Seite" type="button">
+<span class="material-symbols-outlined text-base" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Grid Extra Info & Empty-State-Referenzkarte -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+<!-- Card 1: Tax preparation GoBD Readiness Metric -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-label-sm font-label-sm text-outline">Revisionssicherheit</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">GoBD-Status: Vollständig</h3>
+</div>
+<div class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-3">
+            Alle 37 Dokumente sind mit unveränderlichem Hash und Zeitstempel lokal indexiert. Keine Cloud-Verbindung für OCR notwendig.
+          </p>
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between text-xs text-outline">
+<span>Letzte Verifikation: Heute, 09:41 Uhr</span>
+<span class="text-primary font-medium cursor-pointer hover:underline">Prüfbericht</span>
+</div>
+</div>
+<!-- Card 2: Quick Tax Export Preview -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-label-sm font-label-sm text-outline">Finanzamt &amp; DATEV</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mt-1">USt-Voranmeldung Q3</h3>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-high text-primary">
+<span class="material-symbols-outlined" data-icon="account_balance">account_balance</span>
+</div>
+</div>
+<div class="mt-3 space-y-2">
+<div class="flex justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Vorsteuer 19%</span>
+<span class="font-numeric-data text-numeric-data font-medium">321,44 €</span>
+</div>
+<div class="flex justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Vorsteuer 7%</span>
+<span class="font-numeric-data text-numeric-data font-medium">26,68 €</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between">
+<span class="text-xs font-semibold text-primary">Erstattungsbetrag bereit</span>
+<button class="text-xs font-medium text-primary hover:underline flex items-center gap-1" type="button">
+<span>DATEV-Format</span>
+<span class="material-symbols-outlined text-xs" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Empty-State-Referenzkarte (Für leere Ordner) as specified -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-dashed border-outline-variant shadow-sm flex flex-col items-center text-center justify-center relative overflow-hidden group">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-primary mb-3 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="folder_off">folder_off</span>
+</div>
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider text-[11px] mb-1">Referenzansicht</span>
+<h4 class="text-headline-sm font-headline-sm text-on-surface">Noch keine Belege vorhanden</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-xs mt-1 mb-4">
+            In diesem Filterzeitraum oder dieser Kategorie liegen derzeit noch keine Belege vor.
+          </p>
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-highest hover:bg-secondary-fixed text-primary font-label-md text-label-md transition-colors shadow-xs" type="button">
+<span class="material-symbols-outlined text-base" data-icon="upload_file">upload_file</span>
+<span>Ersten Beleg hochladen</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

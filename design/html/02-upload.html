@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Belegio - Beleg hochladen</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error-container": "#ffdad6",
+            "on-background": "#131b2e",
+            "on-secondary-fixed-variant": "#224e47",
+            "surface": "#faf8ff",
+            "outline": "#6e7977",
+            "surface-tint": "#006a63",
+            "inverse-primary": "#80d5cb",
+            "tertiary-container": "#007a33",
+            "on-secondary-fixed": "#00201c",
+            "surface-container": "#eaedff",
+            "tertiary-fixed": "#7ffc97",
+            "error": "#ba1a1a",
+            "on-surface": "#131b2e",
+            "on-tertiary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00504a",
+            "on-surface-variant": "#3e4947",
+            "secondary-fixed": "#bdece2",
+            "on-tertiary-fixed-variant": "#005320",
+            "secondary-container": "#bdece2",
+            "primary-fixed-dim": "#80d5cb",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#bdc9c6",
+            "tertiary": "#005f26",
+            "on-tertiary-container": "#a1ffad",
+            "primary-container": "#0f766e",
+            "secondary": "#3b665f",
+            "on-secondary-container": "#416c65",
+            "on-primary-fixed": "#00201d",
+            "surface-bright": "#faf8ff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e2e7ff",
+            "surface-variant": "#dae2fd",
+            "on-primary": "#ffffff",
+            "secondary-fixed-dim": "#a2d0c6",
+            "surface-dim": "#d2d9f4",
+            "on-primary-container": "#a3faef",
+            "inverse-surface": "#283044",
+            "primary": "#005c55",
+            "on-secondary": "#ffffff",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "inverse-on-surface": "#eef0ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#62df7d",
+            "background": "#faf8ff",
+            "primary-fixed": "#9cf2e8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.75rem",
+            "margin": "2rem",
+            "space-xl": "2rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "numeric-data": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-data": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-custom {
+      animation: spin-slow 1.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen">
+<!-- ========================================== -->
+<!-- SHARED COMPONENT: SideNavBar (Desktop Fixed) -->
+<!-- ========================================== -->
+<aside class="fixed top-0 left-0 h-full w-60 flex flex-col justify-between p-4 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm dark:shadow-none z-30">
+<div class="flex flex-col gap-6">
+<!-- Brand Header -->
+<div class="flex items-center gap-3 px-2 pt-1">
+<div class="w-9 h-9 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight leading-none">Belegio</span>
+<span class="text-label-sm font-label-sm text-outline mt-0.5">GoBD-konform &amp; Lokal</span>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<!-- Semantic Active Mapping: Current page is "Beleg hochladen" (Screen 2: Upload) -->
+<nav aria-label="Hauptnavigation" class="flex flex-col gap-1.5">
+<!-- Übersicht (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99] transition-transform duration-100 ease-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Übersicht</span>
+</a>
+<!-- Beleg hochladen (ACTIVE TAB) -->
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container dark:bg-primary-container text-on-secondary-container dark:text-on-primary-container font-label-md text-label-md border-l-2 border-primary dark:border-inverse-primary active:scale-[0.99] transition-transform duration-100 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+<span>Beleg hochladen</span>
+</a>
+<!-- Belege (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99] transition-transform duration-100 ease-out" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>Belege</span>
+</a>
+<!-- Export (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99] transition-transform duration-100 ease-out" href="#">
+<span class="material-symbols-outlined">ios_share</span>
+<span>Export</span>
+</a>
+<!-- Einstellungen (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99] transition-transform duration-100 ease-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Einstellungen</span>
+</a>
+</nav>
+</div>
+<!-- SideNavBar Footer with Privacy Trust Badge -->
+<div class="flex flex-col gap-3 pt-4 border-t border-outline-variant/40">
+<div class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary-container text-label-sm font-label-sm shadow-none">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">lock</span>
+<span>100% lokal verarbeitet</span>
+</div>
+<div class="text-[11px] text-outline px-1 leading-tight">
+        Keine Cloud-Übertragung. GoBD-konform auf deinem Rechner.
+      </div>
+</div>
+</aside>
+<!-- ========================================== -->
+<!-- SHARED COMPONENT: TopNavBar (Desktop Header) -->
+<!-- ========================================== -->
+<header class="fixed top-0 left-60 right-0 h-16 flex items-center justify-between px-6 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none z-20">
+<!-- Left: Global OCR Scan / File Search -->
+<div class="flex items-center gap-3 w-80">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-label-md pointer-events-none">search</span>
+<input class="w-full h-10 pl-9 pr-3 text-body-md font-body-md text-on-surface bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Belege, Händler oder Beträge suchen..." type="text"/>
+</div>
+</div>
+<!-- Right: Action clusters, Notifications, Export and Profile -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 border-r border-outline-variant/60 pr-3">
+<button aria-label="Benachrichtigungen" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors relative" type="button">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary ring-2 ring-surface-container-lowest"></span>
+</button>
+<button aria-label="Hilfe" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<!-- Trailing Primary Action: Export -->
+<button class="h-9 px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low hover:border-outline font-label-md text-label-md flex items-center gap-2 transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-sm" style="font-size: 18px;">ios_share</span>
+<span>Export</span>
+</button>
+<!-- User Profile indicator -->
+<div class="flex items-center gap-2.5 pl-1">
+<div class="relative">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-sm flex items-center justify-center font-semibold">
+            BK
+          </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-tertiary rounded-full ring-2 ring-surface-container-lowest" title="Lokaler Node aktiv"></span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-label-md text-label-md text-on-surface leading-tight">Batuhan K.</span>
+<span class="font-label-sm text-label-sm text-outline leading-none text-[11px]">Freiberufler</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- MAIN WORKSPACE CANVAS -->
+<!-- ========================================== -->
+<main class="ml-60 pt-16 min-h-screen bg-surface">
+<div class="max-w-[1200px] mx-auto p-8 flex flex-col gap-6">
+<!-- Page Header with Subtext -->
+<section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Beleg hochladen</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant mt-1">
+            Scanne und digitalisiere Quittungen, Rechnungen und Bewirtungsbelege direkt im Browser.
+          </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/60 text-outline text-label-sm font-label-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+            WebAssembly KI bereit (Lokal v2.4)
+          </span>
+</div>
+</section>
+<!-- Drag & Drop Upload Zone (Hero Card) -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/70 shadow-sm p-8 flex flex-col items-center justify-center text-center transition-all hover:border-primary-container/80">
+<div class="w-full max-w-2xl py-6 px-4 border-2 border-dashed border-primary-container rounded-xl bg-surface/60 flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-secondary-container/20 group">
+<!-- Icon Circle -->
+<div class="w-16 h-16 rounded-full bg-secondary-container text-primary-container flex items-center justify-center shadow-sm mb-4 group-hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined text-headline-lg" style="font-size: 34px;">upload_file</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface mb-1">
+            Belege hierher ziehen oder Datei auswählen
+          </h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-4">
+            Ziehe mehrere Belege gleichzeitig in dieses Feld für automatischen Batch-Import.
+          </p>
+<!-- Supported formats chips -->
+<div class="flex flex-wrap items-center justify-center gap-2 mb-2">
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/50">JPG</span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/50">PNG</span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/50">PDF</span>
+<span class="px-2.5 py-1 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/50">ZUGFeRD / XRechnung</span>
+<span class="px-2 py-1 text-label-sm font-label-sm text-outline">max. 25 MB</span>
+</div>
+</div>
+<!-- Secondary Upload Action Buttons -->
+<div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+<button class="h-10 px-4 rounded-lg bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 20px;">photo_camera</span>
+<span>Mit Kamera aufnehmen</span>
+</button>
+<button class="h-10 px-4 rounded-lg bg-surface-container-lowest border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 20px;">mail</span>
+<span>Aus E-Mail importieren</span>
+</button>
+</div>
+</section>
+<!-- Upload Queue & Progress Section -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Upload-Warteschlange</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-semibold">
+              3 Belege in Bearbeitung
+            </span>
+</div>
+<span class="text-label-sm font-label-sm text-outline">
+            4-Schritte-Pipeline: Zuschneiden → OCR → Extraktion → Prüfung
+          </span>
+</div>
+<div class="flex flex-col gap-3.5">
+<!-- ============================================== -->
+<!-- ITEM 1: Erfolgreich abgeschlossen (REWE Beleg) -->
+<!-- ============================================== -->
+<article class="bg-surface-container-lowest rounded-xl border border-outline-variant/80 p-5 shadow-sm hover:border-outline-variant transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+<div class="flex items-start sm:items-center gap-4 min-w-[280px]">
+<!-- Mock Document Thumbnail -->
+<div class="w-14 h-16 rounded-lg bg-surface-container flex flex-col items-center justify-center border border-outline-variant/60 flex-shrink-0 relative overflow-hidden">
+<span class="material-symbols-outlined text-outline" style="font-size: 24px;">receipt</span>
+<span class="text-[10px] font-numeric-data text-outline mt-0.5 font-bold">REWE</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-tertiary"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate max-w-[200px]" title="REWE_Beleg_20260912.jpg">REWE_Beleg_20260912.jpg</span>
+<span class="px-2 py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span>
+                    Bereit
+                  </span>
+</div>
+<div class="flex items-center gap-3 text-body-sm font-body-sm text-outline mt-1">
+<span>1.4 MB</span>
+<span>•</span>
+<span>Betrag: 48,90 €</span>
+<span>•</span>
+<span>19% MwSt.</span>
+</div>
+</div>
+</div>
+<!-- Detailed 4-Step Stepper (All 4 Completed) -->
+<div class="flex-1 max-w-xl px-2">
+<div class="grid grid-cols-4 gap-2 relative">
+<!-- Step 1 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1 shadow-xs">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium">1. Zuschneiden</span>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1 shadow-xs">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium">2. OCR</span>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1 shadow-xs">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface font-medium">3. Extraktion</span>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1 shadow-xs">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-tertiary font-semibold">4. Prüfung</span>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="flex items-center gap-2 justify-end">
+<button class="h-10 px-4 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md flex items-center gap-2 shadow-xs transition-all active:scale-[0.98]" type="button">
+<span>Jetzt prüfen</span>
+<kbd class="px-1.5 py-0.5 text-[11px] font-numeric-data rounded bg-on-primary/20 text-on-primary font-semibold">↵ Enter</kbd>
+</button>
+</div>
+</article>
+<!-- ============================================== -->
+<!-- ITEM 2: In Bearbeitung (Hetzner Rechnung)      -->
+<!-- ============================================== -->
+<article class="bg-surface-container-lowest rounded-xl border border-secondary-container/90 p-5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden">
+<!-- Subtle active glow on left edge -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex items-start sm:items-center gap-4 min-w-[280px]">
+<!-- Mock Document Thumbnail -->
+<div class="w-14 h-16 rounded-lg bg-secondary-container/30 flex flex-col items-center justify-center border border-outline-variant/60 flex-shrink-0 relative overflow-hidden">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 24px;">picture_as_pdf</span>
+<span class="text-[10px] font-numeric-data text-outline mt-0.5 font-bold">PDF</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate max-w-[200px]" title="Rechnung_Hetzner_R9821.pdf">Rechnung_Hetzner_R9821.pdf</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] animate-spin-custom">sync</span>
+                    Verarbeite
+                  </span>
+</div>
+<div class="flex items-center gap-3 text-body-sm font-body-sm text-outline mt-1">
+<span>420 KB</span>
+<span>•</span>
+<span>Server &amp; Hosting</span>
+</div>
+</div>
+</div>
+<!-- Detailed 4-Step Stepper (Step 3 Active with 68% progress bar) -->
+<div class="flex-1 max-w-xl px-2">
+<div class="grid grid-cols-4 gap-2 mb-2">
+<!-- Step 1 (Done) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">1. Zuschneiden</span>
+</div>
+<!-- Step 2 (Done) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">2. OCR</span>
+</div>
+<!-- Step 3 (ACTIVE + SPINNER) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-secondary-container text-primary-container border border-primary-container flex items-center justify-center text-label-sm font-semibold mb-1">
+<span class="material-symbols-outlined text-sm animate-spin-custom" style="font-size: 16px;">progress_activity</span>
+</div>
+<span class="text-label-sm font-label-sm text-primary font-semibold">3. Extraktion (68%)</span>
+</div>
+<!-- Step 4 (Waiting) -->
+<div class="flex flex-col items-center text-center opacity-45">
+<div class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center text-label-sm font-semibold mb-1">
+                    4
+                  </div>
+<span class="text-label-sm font-label-sm text-outline">4. Prüfung</span>
+</div>
+</div>
+<!-- Animated Progress Bar -->
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary-container h-1.5 rounded-full transition-all duration-300" style="width: 68%;"></div>
+</div>
+</div>
+<!-- Action Status -->
+<div class="flex items-center gap-2 justify-end min-w-[130px]">
+<span class="inline-flex items-center gap-1.5 text-label-sm font-label-sm text-primary font-medium">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+                Extrahiere Felder...
+              </span>
+</div>
+</article>
+<!-- ============================================== -->
+<!-- ITEM 3: Fehlgeschlagen mit klarer Lösung (Aral)-->
+<!-- ============================================== -->
+<article class="bg-surface-container-lowest rounded-xl border border-error/30 p-5 shadow-sm flex flex-col gap-4">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+<div class="flex items-start sm:items-center gap-4 min-w-[280px]">
+<!-- Mock Document Thumbnail -->
+<div class="w-14 h-16 rounded-lg bg-error-container/20 flex flex-col items-center justify-center border border-error/30 flex-shrink-0 relative overflow-hidden">
+<span class="material-symbols-outlined text-error" style="font-size: 24px;">broken_image</span>
+<span class="text-[10px] font-numeric-data text-error mt-0.5 font-bold">PNG</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate max-w-[200px]" title="Tankstelle_Aral_Scan.png">Tankstelle_Aral_Scan.png</span>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-[11px] font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">error</span>
+                      Erkennung fehlgeschlagen
+                    </span>
+</div>
+<div class="flex items-center gap-3 text-body-sm font-body-sm text-outline mt-1">
+<span>890 KB</span>
+<span>•</span>
+<span>Tankquittung</span>
+</div>
+</div>
+</div>
+<!-- Detailed 4-Step Stepper (Step 2 Failed) -->
+<div class="flex-1 max-w-xl px-2">
+<div class="grid grid-cols-4 gap-2">
+<!-- Step 1 (Done) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-label-sm font-semibold mb-1">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface">1. Zuschneiden</span>
+</div>
+<!-- Step 2 (Failed / Error) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-7 h-7 rounded-full bg-error text-on-error flex items-center justify-center text-label-sm font-semibold mb-1 shadow-xs">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">close</span>
+</div>
+<span class="text-label-sm font-label-sm text-error font-semibold">2. OCR Fehler</span>
+</div>
+<!-- Step 3 (Blocked) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center text-label-sm font-semibold mb-1">
+                      3
+                    </div>
+<span class="text-label-sm font-label-sm text-outline">3. Extraktion</span>
+</div>
+<!-- Step 4 (Blocked) -->
+<div class="flex flex-col items-center text-center opacity-40">
+<div class="w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center text-label-sm font-semibold mb-1">
+                      4
+                    </div>
+<span class="text-label-sm font-label-sm text-outline">4. Prüfung</span>
+</div>
+</div>
+</div>
+<!-- Remediation Action Buttons -->
+<div class="flex items-center gap-2 justify-end">
+<button class="h-10 px-3.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low font-label-md text-label-md flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" style="font-size: 18px;">edit_document</span>
+<span>Manuell erfassen</span>
+</button>
+<button class="h-10 px-3.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md flex items-center gap-1.5 transition-colors active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-sm" style="font-size: 18px;">refresh</span>
+<span>Erneut versuchen</span>
+</button>
+</div>
+</div>
+<!-- Clear Error Guidance Banner -->
+<div class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-error-container/40 border border-error-container text-on-surface">
+<span class="material-symbols-outlined text-error" style="font-size: 20px;">info</span>
+<span class="text-body-sm font-body-sm">
+<strong>Bild zu unscharf – bitte erneut aufnehmen.</strong> Der OCR-Algorithmus konnte Steuernummer und Endbetrag nicht zweifelsfrei auflösen. Verwende besseres Licht oder erfasse den Beleg manuell.
+              </span>
+</div>
+</article>
+</div>
+</section>
+<!-- Bottom Trust Box (Data Sovereignty & GoBD Statement) -->
+<footer class="mt-4 p-5 rounded-xl bg-surface-container-lowest border border-outline-variant/70 shadow-sm flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-headline-sm">lock</span>
+</div>
+<div class="flex flex-col gap-1">
+<h4 class="font-headline-sm text-label-md font-semibold text-on-surface">
+            Deine Belege verlassen nie deinen Rechner.
+          </h4>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+            Alle Berechnungen, OCR und Datenextraktionen laufen 100% clientseitig im WebAssembly-/Lokalkern deines Browsers. Keine externen API-Aufrufe, keine Server-Uploads, vollständige Wahrung des Steuergeheimnisses nach GoBD und DSGVO.
+          </p>
+</div>
+</footer>
+</div>
+</main>
+</body></html>

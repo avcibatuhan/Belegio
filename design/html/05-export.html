@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Belegio – Steuer- &amp; Buchhaltungsexport</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error-container": "#ffdad6",
+            "on-background": "#131b2e",
+            "on-secondary-fixed-variant": "#224e47",
+            "surface": "#faf8ff",
+            "outline": "#6e7977",
+            "surface-tint": "#006a63",
+            "inverse-primary": "#80d5cb",
+            "tertiary-container": "#007a33",
+            "on-secondary-fixed": "#00201c",
+            "surface-container": "#eaedff",
+            "tertiary-fixed": "#7ffc97",
+            "error": "#ba1a1a",
+            "on-surface": "#131b2e",
+            "on-tertiary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00504a",
+            "on-surface-variant": "#3e4947",
+            "secondary-fixed": "#bdece2",
+            "on-tertiary-fixed-variant": "#005320",
+            "secondary-container": "#bdece2",
+            "primary-fixed-dim": "#80d5cb",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#bdc9c6",
+            "tertiary": "#005f26",
+            "on-tertiary-container": "#a1ffad",
+            "primary-container": "#0f766e",
+            "secondary": "#3b665f",
+            "on-secondary-container": "#416c65",
+            "on-primary-fixed": "#00201d",
+            "surface-bright": "#faf8ff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e2e7ff",
+            "surface-variant": "#dae2fd",
+            "on-primary": "#ffffff",
+            "secondary-fixed-dim": "#a2d0c6",
+            "surface-dim": "#d2d9f4",
+            "on-primary-container": "#a3faef",
+            "inverse-surface": "#283044",
+            "primary": "#005c55",
+            "on-secondary": "#ffffff",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "inverse-on-surface": "#eef0ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#62df7d",
+            "background": "#faf8ff",
+            "primary-fixed": "#9cf2e8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.75rem",
+            "margin": "2rem",
+            "space-xl": "2rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "numeric-data": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-data": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .font-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased h-full overflow-x-hidden font-body-md text-body-md">
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT: SideNavBar                                              -->
+<!-- ========================================================================= -->
+<aside class="fixed top-0 left-0 h-screen w-60 z-30 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex flex-col justify-between p-4">
+<div class="flex flex-col gap-6">
+<!-- Brand Logo / Identity -->
+<div class="flex items-center gap-3 px-2 pt-1">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-primary" data-icon="receipt_long">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight">Belegio</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant dark:text-inverse-on-surface">GoBD-konform &amp; Lokal</span>
+</div>
+</div>
+<!-- Quick Action CTA -->
+<button class="w-full flex items-center justify-center gap-2 bg-primary-container hover:bg-primary text-on-primary rounded-lg py-2.5 px-3 font-label-md text-label-md transition-colors shadow-sm active:scale-[0.99]">
+<span class="material-symbols-outlined text-base" data-icon="upload_file">upload_file</span>
+<span>Beleg hochladen</span>
+</button>
+<!-- Navigation Tabs -->
+<nav class="flex flex-col gap-1">
+<!-- Übersicht -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="dashboard">dashboard</span>
+<span>Übersicht</span>
+</a>
+<!-- Beleg hochladen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="upload_file">upload_file</span>
+<span>Beleg hochladen</span>
+</a>
+<!-- Belege -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="receipt_long">receipt_long</span>
+<span>Belege</span>
+</a>
+<!-- Export (ACTIVE) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container dark:bg-primary-container text-on-secondary-container dark:text-on-primary-container font-label-md text-label-md border-l-2 border-primary dark:border-inverse-primary active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="ios_share" data-weight="fill" style="font-variation-settings: 'FILL' 1;">ios_share</span>
+<span>Export</span>
+</a>
+<!-- Einstellungen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-[0.99]" href="#">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span>Einstellungen</span>
+</a>
+</nav>
+</div>
+<!-- Privacy Stamp Footer -->
+<div class="pt-4 border-t border-outline-variant dark:border-outline">
+<div class="flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-secondary-container/40 border border-primary/20 text-primary dark:text-inverse-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+<span>🔒 100% lokal verarbeitet</span>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT: TopNavBar                                               -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-60 right-0 h-16 z-20 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex items-center justify-between px-6">
+<!-- Left: Global Search -->
+<div class="flex items-center w-80 relative">
+<span class="material-symbols-outlined absolute left-3 text-outline text-lg pointer-events-none" data-icon="search">search</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface text-body-sm font-body-sm focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all outline-none" placeholder="Beleg, Händler oder Betrag suchen..." type="text"/>
+</div>
+<!-- Right Actions Cluster -->
+<div class="flex items-center gap-4">
+<button aria-label="Hilfe" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined text-xl" data-icon="help_outline">help_outline</span>
+</button>
+<button aria-label="Benachrichtigungen" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors relative active:scale-[0.98]">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container"></span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- User Profile Header Element -->
+<div class="flex items-center gap-3 pl-1">
+<div class="relative">
+<img alt="User profile photo of Batuhan K. with online status" class="w-9 h-9 rounded-full object-cover border border-outline-variant" data-alt="Close-up professional headshot of Batuhan K., a confident Turkish-German freelancer in a smart navy casual blazer against a soft, bright studio background, warm high-key natural lighting and subtle teal accents reflecting the modern fintech workspace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD79BEhqofBgmBVw2l9f1JEfgr3zHFPTEWMmXdh6IlRrbIGIbWpL9KNXYVfDZB2o3ux95rItoK50fh3NL5QixdUDTKeUjR3i6IV7R2FDaKhOtRqAu0KDlpKi48vFRQqiWcg2YbuqEtM1WKT-b7Hk_E1on8P6x5dl5-lvvcLU5Txl5utELqZ4fH6huALlyE6aeX-UjUnmNqzJqRu1h0m2q2Fuo0VR9jBNXXaq9srqtmn2u5vO7CCt8xscw"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-tertiary-container border-2 border-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col text-left">
+<span class="text-label-md font-label-md text-on-surface leading-tight">Batuhan K.</span>
+<span class="text-label-sm font-label-sm text-outline">Freiberufler (DE)</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN CONTENT CANVAS                                                       -->
+<!-- ========================================================================= -->
+<main class="ml-60 pt-16 min-h-screen p-8 bg-background">
+<div class="max-w-6xl mx-auto flex flex-col gap-6">
+<!-- Screen Title & Subtitle -->
+<div class="flex flex-col gap-1">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Steuer- &amp; Buchhaltungsexport</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Erstelle finanzamts- und DATEV-konforme Auswertungen für deinen Steuerberater oder die EÜR.</p>
+</div>
+<!-- 3-Step Wizard Stepper -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+<div class="grid grid-cols-3 gap-4 relative">
+<!-- Step 1 (Abgeschlossen / Aktiv) -->
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="check">check</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary font-semibold">Schritt 1</span>
+<span class="text-label-md font-label-md text-on-surface font-medium">1. Zeitraum</span>
+</div>
+</div>
+<!-- Step 2 (Aktiv) -->
+<div class="flex items-center gap-3 relative before:absolute before:-left-3 before:top-1/2 before:-translate-y-1/2 before:w-6 before:h-px before:bg-outline-variant">
+<div class="w-8 h-8 rounded-full border-2 border-primary-container text-primary-container bg-surface-container-lowest flex items-center justify-center font-label-md text-label-md font-bold">
+              2
+            </div>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary-container font-semibold">Auswahl</span>
+<span class="text-label-md font-label-md text-on-surface font-semibold">2. Format &amp; Optionen</span>
+</div>
+</div>
+<!-- Step 3 (Bevorstehend) -->
+<div class="flex items-center gap-3 opacity-60 relative before:absolute before:-left-3 before:top-1/2 before:-translate-y-1/2 before:w-6 before:h-px before:bg-outline-variant">
+<div class="w-8 h-8 rounded-full border border-outline-variant bg-surface-container-low text-outline flex items-center justify-center font-label-md text-label-md">
+              3
+            </div>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-outline">Abschluss</span>
+<span class="text-label-md font-label-md text-on-surface-variant font-medium">3. Download &amp; Übergabe</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2-Spalten-Layout: Links Konfiguration, Rechts Live-Zusammenfassung -->
+<div class="grid grid-cols-12 gap-6 items-start">
+<!-- ===================================================================== -->
+<!-- LINKE SPALTE: WIZARD CONFIGURATION (Col 7)                            -->
+<!-- ===================================================================== -->
+<div class="col-span-12 lg:col-span-7 flex flex-col gap-6">
+<!-- Schritt 1 - Zeitraum auswählen -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col gap-3.5">
+<div class="flex items-center justify-between">
+<span class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="calendar_today">calendar_today</span>
+                1. Zeitraum festlegen
+              </span>
+<span class="text-label-sm font-label-sm text-outline font-numeric-data">01.09.2026 – 30.09.2026</span>
+</div>
+<!-- Schnellauswahl-Chips -->
+<div class="flex flex-wrap gap-2 pt-1">
+<button class="px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm flex items-center gap-1.5 shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+<span>Dieser Monat (Sep 2026)</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant transition-colors active:scale-95">
+                Letztes Quartal (Q2)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant transition-colors active:scale-95">
+                Jahr 2026
+              </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant transition-colors active:scale-95 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="tune">tune</span>
+                Benutzerdefiniert
+              </button>
+</div>
+</div>
+<!-- Schritt 2 - Exportformat wählen -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="dataset">dataset</span>
+                2. Exportformat wählen
+              </span>
+<span class="text-label-sm font-label-sm text-outline">1 ausgewählt</span>
+</div>
+<!-- 3 Format-Karten (Radio-Karten-Design) -->
+<div class="flex flex-col gap-3">
+<!-- Karte 1: CSV (Excel) -->
+<label class="group relative flex items-start gap-4 p-4 rounded-xl border border-outline-variant hover:border-primary-container/40 bg-surface-container-lowest hover:bg-surface-container-low/50 cursor-pointer transition-all">
+<input class="mt-1 h-4 w-4 text-primary-container focus:ring-primary-container border-outline" name="export_format" type="radio" value="csv"/>
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center justify-between">
+<span class="text-label-md font-label-md font-bold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="table_chart">table_chart</span>
+                      CSV (Excel)
+                    </span>
+<span class="text-label-sm font-label-sm text-outline">.csv / .xlsx</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                    Für eigene Tabellenkalkulation und EÜR-Übersichten. Beinhaltet alle Buchungszeilen, Steuersätze und Notizen.
+                  </p>
+</div>
+</label>
+<!-- Karte 2: PDF-Paket für Steuerberater (SELECTED & EMPFOHLEN) -->
+<label class="relative flex items-start gap-4 p-4 rounded-xl border-2 border-primary-container bg-surface-container-low/40 cursor-pointer shadow-sm">
+<input checked="" class="mt-1 h-4 w-4 text-primary-container focus:ring-primary-container border-primary-container" name="export_format" type="radio" value="pdf"/>
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-label-md font-label-md font-bold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="picture_as_pdf">picture_as_pdf</span>
+                        PDF-Paket für Steuerberater
+                      </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm text-[11px] font-semibold border border-primary/20">
+                        Empfohlen
+                      </span>
+</div>
+<span class="text-label-sm font-label-sm text-primary font-medium">ZIP-Archiv</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                    Alle Belege als durchsuchbare PDFs, sortiert nach Datum mit vorangestelltem Deckblatt und Summenblatt.
+                  </p>
+</div>
+</label>
+<!-- Karte 3: DATEV-kompatible CSV (PRO) -->
+<label class="group relative flex items-start gap-4 p-4 rounded-xl border border-outline-variant hover:border-primary-container/40 bg-surface-container-lowest hover:bg-surface-container-low/50 cursor-pointer transition-all">
+<input class="mt-1 h-4 w-4 text-primary-container focus:ring-primary-container border-outline" name="export_format" type="radio" value="datev"/>
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-label-md font-label-md font-bold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="account_balance">account_balance</span>
+                        DATEV-kompatible CSV
+                      </span>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-sm text-label-sm text-[11px] font-semibold border border-amber-300">
+                        Pro
+                      </span>
+</div>
+<span class="text-label-sm font-label-sm text-outline">Buchungsstapel</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                    Direkter Buchungsstapel nach SKR03 / SKR04 Kontenrahmen für reibungslose Übergabe an Kanzleien.
+                  </p>
+</div>
+</label>
+</div>
+</div>
+<!-- Schritt 3 - Einstellungen vor dem Export -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col gap-3.5">
+<span class="text-headline-sm font-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="tune">tune</span>
+              3. Einstellungen vor dem Export
+            </span>
+<div class="flex flex-col gap-2.5 pt-1">
+<label class="flex items-center gap-3 cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container border-outline-variant h-4 w-4" type="checkbox"/>
+<span class="text-body-md font-body-md text-on-surface">Belegbilder an PDF anhängen</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer select-none">
+<input checked="" class="rounded text-primary-container focus:ring-primary-container border-outline-variant h-4 w-4" type="checkbox"/>
+<span class="text-body-md font-body-md text-on-surface">Beleg-IDs auf Kassenbons stempeln</span>
+</label>
+</div>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- RECHTE SPALTE: LIVE-ZUSAMMENFASSUNGSKARTE (Col 5)                     -->
+<!-- ===================================================================== -->
+<div class="col-span-12 lg:col-span-5 sticky top-24 flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<!-- Card Header -->
+<div class="bg-primary-container text-on-primary px-5 py-4 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xl" data-icon="summarize">summarize</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-primary">Live-Zusammenfassung</span>
+</div>
+<span class="text-label-sm font-label-sm bg-on-primary/15 text-on-primary px-2.5 py-0.5 rounded-full">Sep 2026</span>
+</div>
+<!-- Card Body Metrics -->
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-col gap-3 divide-y divide-outline-variant/60">
+<!-- Metric 1: Anzahl Belege -->
+<div class="flex justify-between items-center pt-1">
+<span class="text-body-md font-body-md text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-base" data-icon="receipt">receipt</span>
+                    Anzahl Belege
+                  </span>
+<span class="text-numeric-data font-numeric-data font-semibold text-on-surface font-tabular">37 Belege</span>
+</div>
+<!-- Metric 2: Summe Netto -->
+<div class="flex justify-between items-center pt-3">
+<span class="text-body-md font-body-md text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-base" data-icon="account_balance_wallet">account_balance_wallet</span>
+                    Summe Netto
+                  </span>
+<span class="text-numeric-data font-numeric-data font-semibold text-on-surface font-tabular">1.836,78 €</span>
+</div>
+<!-- Metric 3: Abziehbare Vorsteuer -->
+<div class="flex justify-between items-center pt-3">
+<div class="flex flex-col">
+<span class="text-body-md font-body-md text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-base" data-icon="percent">percent</span>
+                      Abziehbare Vorsteuer
+                    </span>
+<span class="text-label-sm font-label-sm text-outline pl-5">19% &amp; 7% Vorsteuer</span>
+</div>
+<span class="text-numeric-data font-numeric-data font-semibold text-primary font-tabular">348,12 €</span>
+</div>
+<!-- Metric 4: Gesamtbetrag Brutto -->
+<div class="flex justify-between items-baseline pt-3">
+<span class="text-body-lg font-body-lg font-bold text-on-surface">Gesamtbetrag Brutto</span>
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface font-tabular text-lg">2.184,90 €</span>
+</div>
+</div>
+<!-- Prominente Warnbox -->
+<div class="rounded-lg bg-amber-50 border border-amber-200 p-3.5 flex flex-col gap-2">
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5" data-icon="warning">warning</span>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md font-semibold text-amber-900">5 Belege noch nicht geprüft</span>
+<p class="text-body-sm font-body-sm text-amber-800">
+                      Diese werden mit Status „Vorläufig“ exportiert.
+                    </p>
+</div>
+</div>
+<div class="flex justify-end pt-1">
+<button class="text-label-sm font-label-sm text-amber-900 hover:text-amber-950 font-semibold underline underline-offset-2 flex items-center gap-1 transition-colors">
+                    Jetzt vor Export prüfen →
+                  </button>
+</div>
+</div>
+<!-- Primärer Action-Button -->
+<div class="flex flex-col gap-2 pt-2">
+<button class="w-full h-12 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99]">
+<span class="material-symbols-outlined text-xl" data-icon="download">download</span>
+<span>Export erstellen (PDF + CSV)</span>
+</button>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline px-1">
+<span>Geschätzte Dateigröße:</span>
+<span class="font-numeric-data font-tabular">ca. 8,4 MB</span>
+</div>
+</div>
+<!-- GoBD Reassurance Note -->
+<div class="pt-2 border-t border-outline-variant flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-base text-primary shrink-0" data-icon="verified_user">verified_user</span>
+<span>Erfüllt die Anforderungen der GoBD für digitale Belegarchivierung.</span>
+</div>
+</div>
+</div>
+<!-- Quick Help / Support Callout -->
+<div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/60 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="contact_support">contact_support</span>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md font-medium text-on-surface">Fragen zur DATEV-Übergabe?</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Lies unseren Leitfaden für Freiberufler oder teile den Link mit deiner Kanzlei.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

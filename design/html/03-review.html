@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Belegio – Beleg prüfen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "error-container": "#ffdad6",
+            "on-background": "#131b2e",
+            "on-secondary-fixed-variant": "#224e47",
+            "surface": "#faf8ff",
+            "outline": "#6e7977",
+            "surface-tint": "#006a63",
+            "inverse-primary": "#80d5cb",
+            "tertiary-container": "#007a33",
+            "on-secondary-fixed": "#00201c",
+            "surface-container": "#eaedff",
+            "tertiary-fixed": "#7ffc97",
+            "error": "#ba1a1a",
+            "on-surface": "#131b2e",
+            "on-tertiary-fixed": "#002109",
+            "on-primary-fixed-variant": "#00504a",
+            "on-surface-variant": "#3e4947",
+            "secondary-fixed": "#bdece2",
+            "on-tertiary-fixed-variant": "#005320",
+            "secondary-container": "#bdece2",
+            "primary-fixed-dim": "#80d5cb",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#bdc9c6",
+            "tertiary": "#005f26",
+            "on-tertiary-container": "#a1ffad",
+            "primary-container": "#0f766e",
+            "secondary": "#3b665f",
+            "on-secondary-container": "#416c65",
+            "on-primary-fixed": "#00201d",
+            "surface-bright": "#faf8ff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e2e7ff",
+            "surface-variant": "#dae2fd",
+            "on-primary": "#ffffff",
+            "secondary-fixed-dim": "#a2d0c6",
+            "surface-dim": "#d2d9f4",
+            "on-primary-container": "#a3faef",
+            "inverse-surface": "#283044",
+            "primary": "#005c55",
+            "on-secondary": "#ffffff",
+            "on-error": "#ffffff",
+            "surface-container-highest": "#dae2fd",
+            "inverse-on-surface": "#eef0ff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#62df7d",
+            "background": "#faf8ff",
+            "primary-fixed": "#9cf2e8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-sm": "0.75rem",
+            "margin": "2rem",
+            "space-xl": "2rem",
+            "space-xs": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "numeric-data": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-data": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .thermal-receipt {
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: -0.02em;
+    }
+    .bbox-active {
+      box-shadow: 0 0 0 2px #005c55, 0 0 12px rgba(15, 118, 110, 0.4);
+      transform: scale(1.01);
+      z-index: 20;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#f8fafc] text-on-surface font-body-md text-body-md antialiased overflow-hidden flex flex-col">
+<!-- Fixed Side Navigation (Shared Component from JSON) -->
+<aside class="fixed top-0 left-0 h-full w-60 flex flex-col justify-between p-4 bg-surface-container-lowest dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm dark:shadow-none z-30">
+<div class="flex flex-col gap-6">
+<!-- App Brand Anchor -->
+<div class="flex items-center gap-3 px-2 pt-1">
+<div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+</div>
+<div>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-inverse-primary tracking-tight block leading-tight">Belegio</span>
+<span class="text-[11px] font-medium text-slate-500 tracking-normal block">GoBD-konform &amp; Lokal</span>
+</div>
+</div>
+<!-- Quick Upload CTA Button -->
+<button class="w-full h-10 px-3 rounded-lg bg-primary-container text-white flex items-center justify-center gap-2 font-label-md text-label-md shadow-sm hover:bg-[#115E59] active:scale-[0.99] transition-all">
+<span class="material-symbols-outlined" data-icon="upload_file">upload_file</span>
+<span>Beleg hochladen</span>
+</button>
+<!-- Primary Sidebar Navigation Tabs -->
+<nav class="flex flex-col gap-1">
+<!-- Übersicht -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span>Übersicht</span>
+</a>
+<!-- Beleg hochladen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="upload_file">upload_file</span>
+<span>Beleg hochladen</span>
+</a>
+<!-- Belege (ACTIVE: Currently reviewing receipt) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-secondary-container dark:bg-primary-container text-on-secondary-container dark:text-on-primary-container font-label-md text-label-md border-l-2 border-primary dark:border-inverse-primary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-semibold">Belege</span>
+<span class="ml-auto bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold">5</span>
+</a>
+<!-- Export -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="ios_share">ios_share</span>
+<span>Export</span>
+</a>
+<!-- Einstellungen -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant dark:text-inverse-on-surface font-label-md text-label-md hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span>Einstellungen</span>
+</a>
+</nav>
+</div>
+<!-- Privacy Stamp & Audit Status Footer -->
+<div class="pt-4 border-t border-outline-variant/50">
+<div class="flex items-center gap-2 px-3 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[12px] font-medium justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px] text-emerald-700" data-icon="lock">lock</span>
+<span>🔒 100% lokal verarbeitet</span>
+</div>
+<p class="text-[10px] text-slate-400 text-center mt-2">GoBD Archiv-Hash aktiv</p>
+</div>
+</aside>
+<!-- Fixed Desktop Top Navigation Bar (Shared Component from JSON) -->
+<header class="fixed top-0 left-60 right-0 h-16 flex items-center justify-between px-6 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none z-20">
+<!-- Left: Global Quick Search Input -->
+<div class="flex items-center gap-3 w-96">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]" data-icon="search">search</span>
+<input class="w-full h-9 pl-9 pr-3 text-body-sm font-body-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-on-surface transition-all placeholder:text-slate-400" placeholder="Belege, Händler, IBAN durchsuchen..." type="text"/>
+<kbd class="absolute right-2.5 top-2 text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400 font-mono">⌘K</kbd>
+</div>
+</div>
+<!-- Right: Global Actions & User Profile -->
+<div class="flex items-center gap-3">
+<!-- System Status indicator -->
+<div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-teal-50 border border-teal-200 rounded-lg text-teal-800 text-[12px]">
+<span class="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
+<span class="font-medium">Lokale KI bereit</span>
+</div>
+<!-- Notification Action -->
+<button class="relative p-2 text-slate-500 hover:text-on-surface hover:bg-slate-100 rounded-lg transition-colors" title="Benachrichtigungen">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full"></span>
+</button>
+<!-- Help Action -->
+<button class="p-2 text-slate-500 hover:text-on-surface hover:bg-slate-100 rounded-lg transition-colors" title="Hilfe &amp; GoBD-Dokumentation">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<!-- Primary Action: Export -->
+<button class="h-9 px-3.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-label-md text-label-md flex items-center gap-1.5 hover:bg-slate-50 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="ios_share">ios_share</span>
+<span>Export</span>
+</button>
+<!-- User Avatar Profile -->
+<div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+<div class="relative">
+<div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-xs">
+            BK
+          </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white"></span>
+</div>
+<div class="flex flex-col text-left">
+<span class="text-xs font-semibold text-slate-900 leading-tight">Batuhan K.</span>
+<span class="text-[10px] text-slate-500">Freiberufler</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Primary Workspace Canvas -->
+<main class="ml-60 pt-16 flex-1 flex flex-col h-[calc(100vh)] overflow-hidden bg-[#F8FAFC]">
+<!-- Sub-Header / Breadcrumbs & Navigation Ribbon -->
+<section class="h-14 px-8 border-b border-slate-200 bg-white flex items-center justify-between flex-shrink-0 z-10">
+<!-- Breadcrumb Cluster -->
+<nav class="flex items-center gap-2 text-sm">
+<a class="text-slate-500 hover:text-primary transition-colors flex items-center gap-1 font-medium" href="#">
+<span>Belege</span>
+</a>
+<span class="text-slate-300">/</span>
+<a class="text-slate-500 hover:text-primary transition-colors font-medium" href="#">Zu prüfen</a>
+<span class="text-slate-300">/</span>
+<span class="font-semibold text-slate-900 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-teal-600" data-icon="receipt">receipt</span>
+          REWE Markt GmbH
+        </span>
+</nav>
+<!-- Queue Stepper & Progress Pill -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="text-xs font-medium text-slate-700">Beleg <strong class="text-slate-900">2</strong> von <strong>5</strong> noch zu prüfen</span>
+</div>
+<div class="flex items-center rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
+<button class="p-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-r border-slate-200" title="Vorheriger Beleg (Pfeil links)">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors" title="Nächster Beleg (Pfeil rechts)">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Split-Screen Workspace Container (50% Viewer / 50% Extraction Form) -->
+<div class="flex-1 grid grid-cols-2 divide-x divide-slate-200 overflow-hidden pb-16">
+<!-- LEFT COLUMN: Receipt Inspection Canvas -->
+<section class="flex flex-col bg-[#F1F5F9] relative overflow-hidden select-none">
+<!-- Floating Tool Palette -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-200 shadow-md">
+<button class="p-1.5 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors" id="zoom-in" title="Vergrößern (+)">
+<span class="material-symbols-outlined text-[20px]" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="p-1.5 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors" id="zoom-out" title="Verkleinern (−)">
+<span class="material-symbols-outlined text-[20px]" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="p-1.5 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors" id="fit-width" title="Auf Fensterbreite einpassen">
+<span class="material-symbols-outlined text-[20px]" data-icon="fit_screen">fit_screen</span>
+</button>
+<button class="p-1.5 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors" id="rotate-doc" title="90° Drehen">
+<span class="material-symbols-outlined text-[20px]" data-icon="rotate_right">rotate_right</span>
+</button>
+<div class="h-4 w-px bg-slate-200 mx-1"></div>
+<!-- Bounding Boxes Visual Toggle -->
+<label class="flex items-center gap-2 cursor-pointer pl-1">
+<input checked="" class="sr-only peer" id="toggle-bboxes" type="checkbox"/>
+<div class="w-7 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+<span class="text-xs font-medium text-slate-700 select-none">Erkannte Bereiche</span>
+</label>
+</div>
+<!-- Document Viewport / Canvas Container -->
+<div class="flex-1 overflow-auto p-8 flex items-center justify-center" id="viewer-container">
+<!-- Realistic German Kassenbon (Thermal Paper Style) -->
+<div class="relative w-[360px] bg-white rounded-md shadow-2xl p-7 text-slate-900 thermal-receipt transition-all duration-200 border border-slate-200" id="receipt-paper">
+<!-- Jagged Receipt Edge Cut Effect at top -->
+<div class="absolute -top-1.5 left-0 right-0 h-2 bg-repeat-x opacity-40" style="background-image: radial-gradient(circle, transparent 2px, #F1F5F9 2px); background-size: 8px 8px;"></div>
+<!-- Store Header Section -->
+<div class="text-center pb-4 border-b border-dashed border-slate-300">
+<!-- Bounding Box: Händler (REWE Markt GmbH) -->
+<div class="relative inline-block px-2 py-0.5 rounded transition-all duration-150 bg-teal-500/15 border border-teal-600 text-slate-900 group cursor-pointer" id="bbox-merchant" title="Erkannter Händler: REWE Markt GmbH (99% Konfidenz)">
+<span class="absolute -top-3.5 left-0 bg-teal-700 text-white text-[9px] px-1 rounded font-sans tracking-wide font-medium">Händler</span>
+<p class="font-bold text-base tracking-wider">REWE Markt GmbH</p>
+</div>
+<p class="text-xs mt-1 text-slate-600">Filiale 4208 - Berlin Friedrichshain</p>
+<p class="text-[11px] text-slate-500">Warschauer Str. 74, 10243 Berlin</p>
+<p class="text-[11px] text-slate-500">St.-Nr.: 37/241/00822 • USt-ID: DE811115361</p>
+</div>
+<!-- Date and Receipt Info -->
+<div class="py-3 text-xs border-b border-dashed border-slate-300 flex justify-between items-center">
+<span>Beleg-Nr.: #94821</span>
+<!-- Bounding Box: Datum (12.09.2026 - Needs Check) -->
+<div class="relative px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500 transition-all duration-150 cursor-pointer" id="bbox-date" title="Erkanntes Datum: Bitte prüfen (72% Konfidenz)">
+<span class="absolute -top-3.5 right-0 bg-amber-600 text-white text-[9px] px-1 rounded font-sans font-medium">Prüfen: Datum</span>
+<span class="font-bold">12.09.2026 14:32</span>
+</div>
+</div>
+<!-- Line Items Table -->
+<div class="py-4 text-xs space-y-1.5">
+<div class="flex justify-between">
+<span>1x Tchibo Bio Espresso 500g</span>
+<span class="font-numeric-data">14,90 B</span>
+</div>
+<div class="flex justify-between">
+<span>2x Premium Notizblock A4 kariert</span>
+<span class="font-numeric-data">9,80 A</span>
+</div>
+<div class="flex justify-between">
+<span>1x Textmarker 4er Set Pastell</span>
+<span class="font-numeric-data">4,45 A</span>
+</div>
+<div class="flex justify-between">
+<span>1x USB-C Datenkabel 2m</span>
+<span class="font-numeric-data">12,65 A</span>
+</div>
+<div class="flex justify-between">
+<span>1x Bio Hafermilch Barista 1L</span>
+<span class="font-numeric-data">2,20 B</span>
+</div>
+<div class="flex justify-between text-slate-500 text-[11px]">
+<span>1x Mehrwegtragetasche</span>
+<span class="font-numeric-data">5,80 A</span>
+</div>
+</div>
+<!-- Financial Tax Breakdown & Subtotals -->
+<div class="pt-2 border-t border-slate-300 space-y-1.5 text-xs">
+<!-- Bounding Box: Nettobetrag -->
+<div class="relative flex justify-between px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-600 transition-all duration-150 cursor-pointer" id="bbox-net">
+<span class="text-slate-600">Zwischensumme Netto</span>
+<span class="font-bold font-numeric-data">41,85 €</span>
+</div>
+<!-- Bounding Box: MwSt Details -->
+<div class="relative flex justify-between px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-600 transition-all duration-150 cursor-pointer" id="bbox-vat">
+<span class="text-slate-600">Gesamt MwSt (A=19% / B=7%)</span>
+<span class="font-bold font-numeric-data">7,95 €</span>
+</div>
+</div>
+<!-- Bounding Box: Bruttobetrag (Total Sum) -->
+<div class="mt-3 pt-3 border-t-2 border-slate-800 relative px-2 py-1 rounded bg-teal-500/20 border-2 border-teal-600 transition-all duration-150 cursor-pointer" id="bbox-gross">
+<div class="flex justify-between items-baseline font-bold text-base">
+<span>SUMME EUR</span>
+<span class="font-numeric-data text-lg">49,80 €</span>
+</div>
+</div>
+<!-- Payment Details & GoBD Fiscal Compliance Data -->
+<div class="mt-4 pt-3 border-t border-dashed border-slate-300 text-[11px] text-slate-600 space-y-0.5">
+<div class="flex justify-between">
+<span>Zahlungsart:</span>
+<span>Girocard (EC-Karte)</span>
+</div>
+<div class="flex justify-between">
+<span>Karten-Nr.:</span>
+<span>************4829</span>
+</div>
+<div class="flex justify-between">
+<span>TSE-Signatur:</span>
+<span class="font-mono text-[9px] truncate max-w-[150px]">K29z/O110xP/v92L+</span>
+</div>
+<p class="text-center text-[10px] text-slate-400 mt-4">Vielen Dank für Ihren Einkauf!</p>
+</div>
+<!-- Bottom Perforation Edge -->
+<div class="absolute -bottom-1.5 left-0 right-0 h-2 bg-repeat-x opacity-40" style="background-image: radial-gradient(circle, transparent 2px, #F1F5F9 2px); background-size: 8px 8px;"></div>
+</div>
+</div>
+<!-- Bottom Viewer Help & Info -->
+<div class="h-10 bg-white/80 border-t border-slate-200 px-4 flex items-center justify-between text-xs text-slate-500">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-teal-700" data-icon="document_scanner">document_scanner</span>
+<span>Scanauflösung: 300 DPI (Vektorisierte OCR-Ebene)</span>
+</div>
+<span class="text-slate-400">PDF-Hash: 4a2f8b9e...73cd</span>
+</div>
+</section>
+<!-- RIGHT COLUMN: Extraction & GoBD Validation Form -->
+<section class="flex flex-col bg-white overflow-y-auto">
+<!-- Form Header with Confidence Metric -->
+<div class="p-6 border-b border-slate-200 flex items-center justify-between bg-white sticky top-0 z-10">
+<div>
+<div class="flex items-center gap-2.5">
+<h2 class="text-headline-sm font-headline-sm font-semibold text-slate-900">Extrahierte Belegdaten</h2>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                94% Konfidenz
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-slate-500 mt-0.5">Automatisch vorbefüllt durch lokale On-Device OCR. Bitte Eingaben bestätigen.</p>
+</div>
+<button class="px-2.5 py-1 text-xs font-medium text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-lg flex items-center gap-1 transition-colors" title="Scan nochmals lokal berechnen">
+<span class="material-symbols-outlined text-[15px]" data-icon="refresh">refresh</span>
+<span>Neu scannen</span>
+</button>
+</div>
+<!-- Form Body Fields -->
+<div class="p-6 space-y-5">
+<!-- 1. Händler Input -->
+<div class="space-y-1.5" id="field-merchant-wrapper">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md text-slate-700 flex items-center gap-1.5" for="merchant-input">
+<span>Händler / Aussteller</span>
+<span class="text-red-500">*</span>
+</label>
+<!-- Confidence Chip: Safe (99%) -->
+<span class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+                Sicher (99%)
+              </span>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[18px]" data-icon="storefront">storefront</span>
+</div>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg border border-slate-300 text-slate-900 text-body-md font-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="merchant-input" type="text" value="REWE Markt GmbH"/>
+</div>
+</div>
+<!-- 2. Datum Input (Needs Review Warning) -->
+<div class="space-y-1.5 p-3 rounded-xl bg-amber-50/70 border border-amber-200" id="field-date-wrapper">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md text-slate-800 font-semibold flex items-center gap-1.5" for="date-input">
+<span class="material-symbols-outlined text-[18px] text-amber-600" data-icon="event">event</span>
+<span>Belegdatum</span>
+<span class="text-red-500">*</span>
+</label>
+<!-- Confidence Chip: Warning (72%) -->
+<span class="text-xs font-medium text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="warning">warning</span>
+                Bitte prüfen (72%)
+              </span>
+</div>
+<div class="relative">
+<input class="w-full h-10 px-3 rounded-lg border border-amber-300 bg-white text-slate-900 text-body-md font-body-md focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 font-numeric-data" id="date-input" type="text" value="12.09.2026"/>
+</div>
+<div class="flex items-center gap-1.5 text-xs text-amber-800 mt-1">
+<span class="material-symbols-outlined text-[15px]" data-icon="info">info</span>
+<span>Monatsformat unklar erkannt (z. B. 09. Dez vs. 12. Sep). Bitte mit Beleg abgleichen.</span>
+</div>
+</div>
+<!-- Two-column row: 3. Kategorie & 4. Zahlungsart -->
+<div class="grid grid-cols-2 gap-4">
+<!-- 3. Kategorie -->
+<div class="space-y-1.5">
+<label class="text-label-md font-label-md text-slate-700 flex items-center gap-1.5" for="category-select">
+<span>Steuer-Kategorie</span>
+<span class="text-red-500">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3 pr-8 rounded-lg border border-slate-300 text-slate-900 text-body-md font-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white appearance-none" id="category-select">
+<option selected="" value="buero">Büro (Büromaterial &amp; Bedarf)</option>
+<option value="software">Software &amp; Lizenzen</option>
+<option value="reise">Reisekosten / Fahrtkosten</option>
+<option value="bewirtung">Bewirtung (70/30 Regelung)</option>
+<option value="fortbildung">Fortbildung / Fachliteratur</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<!-- 4. Zahlungsart -->
+<div class="space-y-1.5">
+<label class="text-label-md font-label-md text-slate-700 flex items-center gap-1.5" for="payment-select">
+<span>Zahlungsart</span>
+<span class="text-red-500">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3 pr-8 rounded-lg border border-slate-300 text-slate-900 text-body-md font-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white appearance-none" id="payment-select">
+<option selected="" value="ec">EC-Karte / Girocard</option>
+<option value="kreditkarte">Kreditkarte</option>
+<option value="bar">Barzahlung</option>
+<option value="paypal">PayPal</option>
+<option value="ueberweisung">Banküberweisung</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
+<span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Financial Breakdown Block -->
+<div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-4">
+<h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Beträge &amp; Vorsteuer</h3>
+<!-- 5. Nettobetrag -->
+<div class="space-y-1" id="field-net-wrapper">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md text-slate-700" for="net-input">Nettobetrag</label>
+<span class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.2 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
+                  Sicher
+                </span>
+</div>
+<div class="relative">
+<input class="w-full h-10 pl-3 pr-12 text-right rounded-lg border border-slate-300 text-slate-900 font-numeric-data text-numeric-data focus:border-primary focus:ring-2 focus:ring-primary/20" id="net-input" type="text" value="41,85"/>
+<span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500 font-medium text-sm">EUR</span>
+</div>
+</div>
+<!-- 6. MwSt-Satz Segmented Control -->
+<div class="space-y-1.5">
+<label class="text-label-md font-label-md text-slate-700 block">MwSt-Satz (Umsatzsteuer)</label>
+<div class="grid grid-cols-3 gap-2 bg-slate-200/70 p-1 rounded-lg">
+<label class="flex items-center justify-center py-1.5 px-3 rounded-md cursor-pointer transition-all bg-white text-primary font-semibold shadow-xs">
+<input checked="" class="sr-only" name="vat_rate" type="radio" value="19"/>
+<span class="text-xs">19% (Standard)</span>
+</label>
+<label class="flex items-center justify-center py-1.5 px-3 rounded-md cursor-pointer transition-all text-slate-600 hover:text-slate-900">
+<input class="sr-only" name="vat_rate" type="radio" value="7"/>
+<span class="text-xs">7% (Ermäßigt)</span>
+</label>
+<label class="flex items-center justify-center py-1.5 px-3 rounded-md cursor-pointer transition-all text-slate-600 hover:text-slate-900">
+<input class="sr-only" name="vat_rate" type="radio" value="0"/>
+<span class="text-xs">0% / Steuerfrei</span>
+</label>
+</div>
+</div>
+<!-- 7. MwSt-Betrag & 8. Bruttobetrag Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- 7. MwSt-Betrag -->
+<div class="space-y-1" id="field-vat-wrapper">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md text-slate-700" for="vat-input">MwSt-Betrag</label>
+<span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">Sicher</span>
+</div>
+<div class="relative">
+<input class="w-full h-10 pl-3 pr-12 text-right rounded-lg border border-slate-300 text-slate-900 font-numeric-data text-numeric-data focus:border-primary focus:ring-2 focus:ring-primary/20" id="vat-input" type="text" value="7,95"/>
+<span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500 font-medium text-sm">EUR</span>
+</div>
+</div>
+<!-- 8. Bruttobetrag -->
+<div class="space-y-1" id="field-gross-wrapper">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md font-semibold text-slate-900" for="gross-input">Gesamtbetrag (Brutto)</label>
+<span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">Sicher</span>
+</div>
+<div class="relative">
+<input class="w-full h-10 pl-3 pr-12 text-right rounded-lg border-2 border-primary text-slate-900 font-bold font-numeric-data text-base focus:ring-2 focus:ring-primary/20" id="gross-input" type="text" value="49,80"/>
+<span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-700 font-semibold text-sm">EUR</span>
+</div>
+</div>
+</div>
+<!-- Mathematische Prüf- und Validierungsbox -->
+<div class="p-3 rounded-lg bg-emerald-50 border border-emerald-300 flex items-start gap-2.5 text-emerald-900 shadow-xs">
+<span class="material-symbols-outlined text-emerald-700 text-[18px] flex-shrink-0 mt-0.5" data-icon="task_alt">task_alt</span>
+<div class="text-xs leading-relaxed">
+<p class="font-semibold text-emerald-950">Rechnerisch exakt validiert</p>
+<p class="text-emerald-800 font-numeric-data">Netto (41,85 €) + MwSt (7,95 €) = Brutto (49,80 €) ✓ Differenz: 0,00 €</p>
+</div>
+</div>
+</div>
+<!-- 9. Notiz / Verwendungszweck -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="text-label-md font-label-md text-slate-700" for="note-input">Notiz / Steuerlicher Zweck</label>
+<span class="text-xs text-slate-400">Optional für Finanzamt</span>
+</div>
+<textarea class="w-full p-3 rounded-lg border border-slate-300 text-slate-900 text-body-md font-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400" id="note-input" placeholder="z. B. Büromaterial für Kundenprojekt X..." rows="2"></textarea>
+</div>
+</div>
+</section>
+</div>
+<!-- Sticky Bottom Control Action Bar -->
+<footer class="fixed bottom-0 left-60 right-0 h-16 bg-white border-t border-slate-200 px-8 flex items-center justify-between z-30 shadow-lg">
+<!-- Left: Destructive & Skip Actions -->
+<div class="flex items-center gap-3">
+<button class="h-10 px-3.5 rounded-lg border border-red-200 text-red-700 hover:bg-red-50 active:scale-[0.98] transition-all flex items-center gap-2 font-medium text-sm" title="Beleg aus Warteschlange löschen">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete_outline">delete_outline</span>
+<span>Verwerfen</span>
+<kbd class="text-[10px] bg-red-100 text-red-800 px-1 rounded font-mono">Esc</kbd>
+</button>
+<button class="h-10 px-3.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:scale-[0.98] transition-all flex items-center gap-2 font-medium text-sm" title="Diesen Beleg später prüfen">
+<span class="material-symbols-outlined text-[18px]" data-icon="skip_next">skip_next</span>
+<span>Überspringen</span>
+<kbd class="text-[10px] bg-slate-200 text-slate-700 px-1 rounded font-mono">Alt + N</kbd>
+</button>
+</div>
+<!-- Center: Keyboard Shortcuts Helper Hint -->
+<div class="hidden xl:flex items-center gap-2 text-xs text-slate-500">
+<span class="material-symbols-outlined text-[16px] text-teal-600" data-icon="keyboard">keyboard</span>
+<span>Tipp: <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px]">Tab</kbd> zum Wechseln, <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px]">↵ Enter</kbd> zum Speichern</span>
+</div>
+<!-- Right: Primary Save & Next CTA -->
+<div class="flex items-center gap-3">
+<button class="h-10 px-4 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 active:scale-[0.98] font-medium text-sm transition-all">
+          Nur speichern
+        </button>
+<button class="h-10 px-5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] active:bg-[#134E4A] text-white font-medium text-sm flex items-center gap-2.5 shadow-sm active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="check">check</span>
+<span>Speichern &amp; nächster Beleg</span>
+<span class="bg-teal-800/80 text-teal-100 text-[11px] px-2 py-0.5 rounded font-mono font-medium">↵ Enter</span>
+</button>
+</div>
+</footer>
+</main>
+<!-- Interactive Linking Script (Hover Form Fields -> Highlight Visual Bounding Boxes) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mapping from form field IDs to visual receipt bounding boxes
+      const linkMappings = [
+        { field: 'merchant-input', bbox: 'bbox-merchant', wrapper: 'field-merchant-wrapper' },
+        { field: 'date-input', bbox: 'bbox-date', wrapper: 'field-date-wrapper' },
+        { field: 'net-input', bbox: 'bbox-net', wrapper: 'field-net-wrapper' },
+        { field: 'vat-input', bbox: 'bbox-vat', wrapper: 'field-vat-wrapper' },
+        { field: 'gross-input', bbox: 'bbox-gross', wrapper: 'field-gross-wrapper' }
+      ];
+
+      linkMappings.forEach(({ field, bbox, wrapper }) => {
+        const fieldEl = document.getElementById(field);
+        const bboxEl = document.getElementById(bbox);
+        const wrapperEl = document.getElementById(wrapper);
+
+        if (!fieldEl || !bboxEl) return;
+
+        // Hover or focus on field highlights the bounding box on the receipt
+        const highlightOn = () => {
+          bboxEl.classList.add('bbox-active');
+          if (wrapperEl) wrapperEl.classList.add('ring-2', 'ring-primary/30');
+        };
+
+        const highlightOff = () => {
+          bboxEl.classList.remove('bbox-active');
+          if (wrapperEl) wrapperEl.classList.remove('ring-2', 'ring-primary/30');
+        };
+
+        fieldEl.addEventListener('focus', highlightOn);
+        fieldEl.addEventListener('blur', highlightOff);
+        fieldEl.addEventListener('mouseenter', highlightOn);
+        fieldEl.addEventListener('mouseleave', () => {
+          if (document.activeElement !== fieldEl) highlightOff();
+        });
+
+        // Hovering on the bounding box gives feedback to the form field
+        bboxEl.addEventListener('mouseenter', highlightOn);
+        bboxEl.addEventListener('mouseleave', () => {
+          if (document.activeElement !== fieldEl) highlightOff();
+        });
+      });
+
+      // Bounding box visibility toggle
+      const toggleBboxes = document.getElementById('toggle-bboxes');
+      if (toggleBboxes) {
+        toggleBboxes.addEventListener('change', (e) => {
+          const boxes = document.querySelectorAll('[id^="bbox-"]');
+          boxes.forEach(box => {
+            if (e.target.checked) {
+              box.classList.remove('opacity-20', 'border-transparent');
+            } else {
+              box.classList.add('opacity-20', 'border-transparent');
+            }
+          });
+        });
+      }
+
+      // Zoom and Rotate Micro-interactions
+      const receipt = document.getElementById('receipt-paper');
+      let scale = 1;
+      let rotation = 0;
+
+      const updateTransform = () => {
+        if (receipt) {
+          receipt.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        }
+      };
+
+      document.getElementById('zoom-in')?.addEventListener('click', () => {
+        if (scale < 1.4) scale += 0.1;
+        updateTransform();
+      });
+
+      document.getElementById('zoom-out')?.addEventListener('click', () => {
+        if (scale > 0.7) scale -= 0.1;
+        updateTransform();
+      });
+
+      document.getElementById('fit-width')?.addEventListener('click', () => {
+        scale = 1;
+        rotation = 0;
+        updateTransform();
+      });
+
+      document.getElementById('rotate-doc')?.addEventListener('click', () => {
+        rotation = (rotation + 90) % 360;
+        updateTransform();
+      });
+    });
+  </script>
+</body></html>
