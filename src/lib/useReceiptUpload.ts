@@ -46,12 +46,16 @@ export function useReceiptUpload(onSaved?: () => void) {
       try {
         update(id, { stage: 'laden', progress: 0 })
 
+        const ocrStart = performance.now()
         const text = await recognise(file, (p) => {
           update(id, { stage: p.phase, progress: p.progress })
         })
+        const ocrMs = Math.round(performance.now() - ocrStart)
 
         update(id, { stage: 'extrahieren', progress: 1 })
+        const parseStart = performance.now()
         const parsed = parseReceipt(text)
+        const parseMs = Math.round(performance.now() - parseStart)
 
         if (parsed.gross.value <= 0) {
           update(id, {
@@ -83,6 +87,54 @@ export function useReceiptUpload(onSaved?: () => void) {
           },
           arithmeticValid: parsed.arithmeticValid,
           rawText: parsed.rawText,
+          diagnostics: {
+            fields: {
+              'Händler': {
+                value: parsed.merchant.value || '—',
+                confidence: parsed.merchant.confidence,
+                source: parsed.merchant.source,
+                evidence: parsed.merchant.evidence,
+              },
+              'Datum': {
+                value: parsed.date.value,
+                confidence: parsed.date.confidence,
+                source: parsed.date.source,
+                evidence: parsed.date.evidence,
+              },
+              'Netto': {
+                value: String(parsed.net.value),
+                confidence: parsed.net.confidence,
+                source: parsed.net.source,
+                evidence: parsed.net.evidence,
+              },
+              'MwSt.-Betrag': {
+                value: String(parsed.vatAmount.value),
+                confidence: parsed.vatAmount.confidence,
+                source: parsed.vatAmount.source,
+                evidence: parsed.vatAmount.evidence,
+              },
+              'Brutto': {
+                value: String(parsed.gross.value),
+                confidence: parsed.gross.confidence,
+                source: parsed.gross.source,
+                evidence: parsed.gross.evidence,
+              },
+              'MwSt.-Satz': {
+                value: `${Math.round(parsed.vatRate.value * 100)} %`,
+                confidence: parsed.vatRate.confidence,
+                source: parsed.vatRate.source,
+                evidence: parsed.vatRate.evidence,
+              },
+              'Kategorie': {
+                value: parsed.category,
+                confidence: 1,
+                source: 'berechnet',
+              },
+            },
+            trace: parsed.trace,
+            ocrMs,
+            parseMs,
+          },
           image: file,
           createdAt: Date.now(),
         }

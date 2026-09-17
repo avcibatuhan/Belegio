@@ -1,15 +1,30 @@
+import { useEffect, useState } from 'react'
 import { Card } from '../components/Card'
 import { Icon } from '../components/Icon'
 import { StatusChip } from '../components/StatusChip'
-import { RECEIPTS } from '../lib/mockData'
 import { formatDate, formatEur, formatVatRate } from '../lib/format'
-
-const SELECTED = new Set(['r1', 'r2', 'r3'])
+import { allReceipts, type StoredReceipt } from '../lib/db'
 
 export function Belege() {
+  const [receipts, setReceipts] = useState<StoredReceipt[]>([])
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    void allReceipts().then(setReceipts)
+  }, [])
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   // Totals are derived from the selected rows so the bulk bar and the footer agree.
-  const totals = RECEIPTS.filter((r) => SELECTED.has(r.id)).reduce(
-    (acc, r) => ({ net: acc.net + r.net, vat: acc.vat + (r.gross - r.net), gross: acc.gross + r.gross }),
+  const totals = receipts.filter((r) => selected.has(r.id)).reduce(
+    (acc, r) => ({ net: acc.net + r.net, vat: acc.vat + r.vatAmount, gross: acc.gross + r.gross }),
     { net: 0, vat: 0, gross: 0 },
   )
 
@@ -20,7 +35,7 @@ export function Belege() {
           <div className="flex items-center gap-2">
             <h1 className="text-headline-lg text-on-surface">Belegarchiv</h1>
             <span className="rounded-full bg-secondary-container px-2.5 py-1 text-label-sm text-on-secondary-container">
-              37 Belege
+              {receipts.length} Belege
             </span>
           </div>
           <p className="mt-1 text-body-md text-on-surface-variant">
@@ -87,9 +102,9 @@ export function Belege() {
 
         <div className="mt-3 flex items-center gap-2">
           {[
-            { label: 'Alle (37)', active: true },
-            { label: 'Geprüft (32)', dot: '#16A34A' },
-            { label: 'Zu prüfen (5)', dot: '#D97706' },
+            { label: `Alle (${receipts.length})`, active: true },
+            { label: `Geprüft (${receipts.filter((r) => r.status === 'geprueft').length})`, dot: '#16A34A' },
+            { label: `Zu prüfen (${receipts.filter((r) => r.status !== 'geprueft').length})`, dot: '#D97706' },
           ].map((chip) => (
             <button
               key={chip.label}
@@ -108,10 +123,11 @@ export function Belege() {
       </Card>
 
       {/* Bulk action bar */}
+      {selected.size > 0 && (
       <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-secondary-container px-4 py-3">
         <Icon name="check_circle" className="text-[18px] text-primary" />
         <span className="text-label-md text-on-secondary-container">
-          {SELECTED.size} Belege ausgewählt · Summe {formatEur(totals.gross)}
+          {selected.size} Belege ausgewählt · Summe {formatEur(totals.gross)}
         </span>
         <div className="ml-auto flex items-center gap-2">
           {[
@@ -133,6 +149,7 @@ export function Belege() {
           </button>
         </div>
       </div>
+      )}
 
       {/* Table */}
       <Card className="!p-0">
@@ -153,19 +170,20 @@ export function Belege() {
             </tr>
           </thead>
           <tbody>
-            {RECEIPTS.map((r) => {
-              const selected = SELECTED.has(r.id)
+            {receipts.map((r) => {
+              const isSelected = selected.has(r.id)
               return (
                 <tr
                   key={r.id}
                   className={`h-[52px] border-b border-outline-variant text-body-md transition-colors hover:bg-[#F8FAFC] ${
-                    selected ? 'border-l-2 border-l-primary bg-[#F0FDFA]' : ''
+                    isSelected ? 'border-l-2 border-l-primary bg-[#F0FDFA]' : ''
                   }`}
                 >
                   <td className="px-4">
                     <input
                       type="checkbox"
-                      defaultChecked={selected}
+                      checked={isSelected}
+                      onChange={() => toggle(r.id)}
                       className="rounded border-outline text-primary focus:ring-primary"
                     />
                   </td>
@@ -194,13 +212,25 @@ export function Belege() {
           </tbody>
         </table>
 
+        {receipts.length === 0 && (
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <Icon name="receipt_long" className="text-[32px] text-on-surface-variant" />
+            <p className="text-headline-sm text-on-surface">Noch keine Belege</p>
+            <p className="text-body-sm text-on-surface-variant">
+              Lade auf der Übersicht einen Beleg hoch — er erscheint dann hier.
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center justify-between px-4 py-3">
           <span className="text-body-sm text-on-surface-variant">
             Auswahl-Summe · Netto {formatEur(totals.net)} · MwSt. {formatEur(totals.vat)} · Gesamt brutto{' '}
             <span className="font-medium text-on-surface">{formatEur(totals.gross)}</span>
           </span>
           <div className="flex items-center gap-3">
-            <span className="text-body-sm text-on-surface-variant">Zeige 1–10 von 37 Belegen</span>
+            <span className="text-body-sm text-on-surface-variant">
+              Zeige {receipts.length} von {receipts.length} Belegen
+            </span>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4].map((p) => (
                 <button

@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '../components/Card'
 import { Icon } from '../components/Icon'
 import { UploadDropzone } from '../components/UploadDropzone'
-import { CATEGORY_SPLIT, MONTHLY_SPEND } from '../lib/mockData'
 import { formatEur } from '../lib/format'
 import { useReceiptUpload } from '../lib/useReceiptUpload'
-import { allReceipts, type StoredReceipt } from '../lib/db'
+import { allReceipts, clearReceipts, type StoredReceipt } from '../lib/db'
+// Loaded lazily and only in development, so it is absent from production builds.
+const DevInspector = lazy(() =>
+  import('../components/DevInspector').then((m) => ({ default: m.DevInspector })),
+)
 
 function MetricCard({
   label,
@@ -82,7 +85,13 @@ export function Dashboard() {
 
   const { jobs, addFiles, dismiss } = useReceiptUpload(reload)
 
-  // Once real receipts exist they drive the whole page; otherwise placeholders stand in.
+  const clearAll = useCallback(async () => {
+    await clearReceipts()
+    reload()
+  }, [reload])
+
+  const [inspect, setInspect] = useState<StoredReceipt | null>(null)
+
   const live = stored.length > 0
   const liveGross = stored.reduce((s, r) => s + r.gross, 0)
   const liveVat = stored.reduce((s, r) => s + r.vatAmount, 0)
@@ -105,16 +114,22 @@ export function Dashboard() {
       color: SLICE_COLORS[i % SLICE_COLORS.length],
     }))
 
-  const categories = live ? liveCategories : CATEGORY_SPLIT
+  const categories = liveCategories
   const total = categories.reduce((sum, c) => sum + c.value, 0)
 
-  // Real receipts are bucketed into the months already shown on the axis.
-  const monthly = live
-    ? MONTHLY_SPEND.map((m, i) => ({
-        ...m,
-        value: i === MONTHLY_SPEND.length - 1 ? liveGross : 0,
-      }))
-    : MONTHLY_SPEND
+  // Spend grouped by the month each receipt is dated, oldest first.
+  const byMonth = new Map<string, number>()
+  for (const r of stored) {
+    const key = r.date.slice(0, 7) // yyyy-mm
+    byMonth.set(key, (byMonth.get(key) ?? 0) + r.gross)
+  }
+  const monthly = [...byMonth.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-6)
+    .map(([key, value]) => ({
+      month: new Date(`${key}-01`).toLocaleDateString('de-DE', { month: 'short' }),
+      value,
+    }))
   const max = Math.max(...monthly.map((m) => m.value), 1)
 
   return (
@@ -146,22 +161,21 @@ export function Dashboard() {
       <div className="grid grid-cols-4 gap-space-md">
         <MetricCard
           label="Ausgaben diesen Monat"
-          value={formatEur(live ? liveGross : 2184.9)}
-          hint={live ? `aus ${stored.length} erfassten Belegen` : '+12 % ggü. Vormonat'}
-          hintIcon={live ? 'receipt_long' : 'trending_up'}
-          hintClass={live ? 'text-on-surface-variant' : 'text-tertiary'}
+          value={formatEur(liveGross)}
+          hint={`aus ${stored.length} erfassten Belegen`}
+          hintIcon="receipt_long"
           icon="payments"
         />
         <MetricCard
           label="Vorsteuer"
-          value={formatEur(live ? liveVat : 348.12)}
+          value={formatEur(liveVat)}
           hint="100 % voll abzugsfähig"
           hintIcon="check_circle"
           icon="account_balance"
         />
         <MetricCard
           label="Belege"
-          value={live ? String(stored.length) : '37'}
+          value={String(stored.length)}
           hint="gesamt im Monat erfasst"
           icon="receipt_long"
         />
@@ -176,7 +190,7 @@ export function Dashboard() {
             <span className="h-2 w-2 rounded-full bg-[#D97706]" />
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
-            <p className="text-headline-lg tabular-nums text-[#B45309]">{live ? livePending : 5}</p>
+            <p className="text-headline-lg tabular-nums text-[#B45309]">{livePending}</p>
             <Link
               to="/belege"
               className="rounded-lg bg-[#D97706] px-3 py-1.5 text-label-sm text-white transition-opacity hover:opacity-95"
@@ -191,7 +205,21 @@ export function Dashboard() {
       {/* Upload — processed in place, no navigation away from the dashboard */}
       <UploadDropzone jobs={jobs} onFiles={addFiles} onDismiss={dismiss} />
 
-      {/* Charts */}
+      {!live && jobs.length === 0 && (
+        <Card className="!bg-surface-container-low">
+          <div className="flex flex-col items-center gap-2 py-10 text-center">
+            <Icon name="insights" className="text-[32px] text-on-surface-variant" />
+            <p className="text-headline-sm text-on-surface">Noch keine Auswertung</p>
+            <p className="max-w-md text-body-sm text-on-surface-variant">
+              Lade oben deinen ersten Beleg hoch. Sobald er verarbeitet ist, erscheinen hier deine Ausgaben,
+              die Vorsteuer und die Aufschlüsselung nach Kategorie.
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {/* Charts — only meaningful once receipts exist */}
+      {live && (
       <div className="grid grid-cols-3 gap-space-md">
         <Card className="col-span-2">
           <CardHeader
@@ -250,6 +278,69 @@ export function Dashboard() {
           </div>
         </Card>
       </div>
+      )}
+
+      {/* Developer panel: inspect what the OCR and parser actually did. */}
+      {import.meta.env.DEV && stored.length > 0 && (
+        <Card>
+          <div className="mb-3 flex items-center gap-2">
+            <span className="rounded bg-slate-900 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
+              Dev
+            </span>
+            <h2 className="text-headline-sm text-on-surface">Gespeicherte Belege ({stored.length})</h2>
+            <span className="text-body-sm text-on-surface-variant">
+              — zum Prüfen anklicken: erkannte Felder, Ablauf und OCR-Rohtext
+            </span>
+            <button
+              onClick={() => void clearAll()}
+              className="ml-auto rounded-lg border border-error/30 px-3 py-1.5 text-label-sm text-error transition-colors hover:bg-error-container"
+            >
+              Alle löschen
+            </button>
+          </div>
+          <div className="space-y-1.5">
+            {stored.map((r) => {
+              const weak = r.diagnostics
+                ? Object.entries(r.diagnostics.fields).filter(
+                    ([, f]) => f.source === 'fehlt' || f.source === 'geraten',
+                  )
+                : []
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => setInspect(r)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-outline-variant p-2.5 text-left transition-colors hover:bg-surface-container-low"
+                >
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: r.arithmeticValid ? '#16A34A' : '#DC2626' }}
+                  />
+                  <span className="min-w-0 flex-1 truncate text-label-md text-on-surface">{r.merchant}</span>
+                  <span className="shrink-0 text-body-sm tabular-nums text-on-surface-variant">
+                    {formatEur(r.gross)}
+                  </span>
+                  <span className="shrink-0 text-body-sm text-on-surface-variant">{r.category}</span>
+                  {weak.length > 0 && (
+                    <span className="shrink-0 rounded bg-[#FEF3C7] px-1.5 py-0.5 text-[11px] text-[#B45309]">
+                      {weak.length} unsicher
+                    </span>
+                  )}
+                  <span className="shrink-0 text-body-sm tabular-nums text-on-surface-variant">
+                    {Math.round(r.confidence.overall * 100)} %
+                  </span>
+                  <Icon name="chevron_right" className="shrink-0 text-[18px] text-on-surface-variant" />
+                </button>
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
+      {import.meta.env.DEV && inspect && (
+        <Suspense fallback={null}>
+          <DevInspector receipt={inspect} onClose={() => setInspect(null)} />
+        </Suspense>
+      )}
     </div>
   )
 }

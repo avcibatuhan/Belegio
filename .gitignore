@@ -29,10 +29,15 @@ yarn-error.log*
 
 # Belegio: never commit real receipt data (tax records / personal data)
 belege/
+belegs/
+Belege/
 uploads/
 scans/
 exports/
 *.receipt.json
+
+# Development-only notes, not part of the product
+ENTWICKLUNG.md
 
 # TypeScript build info
 *.tsbuildinfo

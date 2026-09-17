@@ -23,6 +23,13 @@ export type StoredReceipt = {
   }
   arithmeticValid: boolean
   rawText: string
+  /** Developer diagnostics: how each field was obtained, and the parser's steps. */
+  diagnostics?: {
+    fields: Record<string, { value: string; confidence: number; source: string; evidence?: string }>
+    trace: string[]
+    ocrMs: number
+    parseMs: number
+  }
   /** Original scan, stored locally so it never leaves the machine. */
   image: Blob
   createdAt: number
