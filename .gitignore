@@ -36,3 +36,6 @@ exports/
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Tesseract language model (downloaded at runtime / cached by browser)
+*.traineddata
