@@ -20,9 +20,10 @@ WebAssembly, so your receipts never leave your machine.
 ---
 
 > [!NOTE]
-> **Project status: UI preview.** All five screens are built and navigable, but
-> they render placeholder data. OCR, storage and export are not implemented yet —
-> see the [roadmap](#roadmap).
+> **Project status: early.** Upload and OCR work end to end on the dashboard —
+> drop in a receipt photo and it is read, parsed and stored locally. The other
+> screens still render placeholder data, and export is not implemented yet.
+> See the [roadmap](#roadmap).
 
 ---
 
@@ -65,7 +66,7 @@ makes no network calls at all.
 
 | Route | Screen | What it does |
 |---|---|---|
-| `/` | **Übersicht** | Monthly spend, input tax, receipt count, pending reviews |
+| `/` | **Übersicht** | KPIs from your real receipts, plus **working upload + OCR** |
 | `/upload` | **Beleg hochladen** | Batch upload with a 4-stage pipeline: crop → OCR → extract → verify |
 | `/pruefen` | **Beleg prüfen** | Scan viewer beside extracted fields, with per-field confidence |
 | `/belege` | **Belegarchiv** | Filterable archive, bulk actions, VAT and totals |
@@ -141,8 +142,11 @@ Because Belegio is intended to handle tax records, a few rules are enforced:
   gitignored; `.mcp.json.example` shows the shape without the values.
 - **No receipt data in the repository.** `belege/`, `uploads/`, `scans/` and
   `exports/` are gitignored.
-- **No network calls** in application code, and no `dangerouslySetInnerHTML`,
-  `eval` or `innerHTML` assignments.
+- **Receipts are never uploaded.** OCR runs in a local WebAssembly worker.
+  The only outbound requests are Tesseract's worker script and German language
+  model, fetched once from a CDN and then cached by the browser; receipt images
+  and extracted data never leave the machine.
+- **No `dangerouslySetInnerHTML`, `eval` or `innerHTML`** assignments.
 - **Zero dependency vulnerabilities** — verified with `npm audit`.
 
 If you find a security problem, please open a private security advisory rather
@@ -152,8 +156,10 @@ than a public issue.
 
 ## Roadmap
 
-- [ ] OCR with `tesseract.js` in a Web Worker
-- [ ] Persistence via IndexedDB (receipts + images)
+- [x] OCR with `tesseract.js` in a Web Worker
+- [x] Persistence via IndexedDB (receipts + images)
+- [ ] Wire the archive, review and upload screens to stored data
+- [ ] PDF receipt support
 - [ ] Real exports: CSV, PDF bundle, DATEV (SKR03 / SKR04)
 - [ ] ZUGFeRD / XRechnung parsing
 - [ ] Settings screen
