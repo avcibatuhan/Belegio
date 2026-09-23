@@ -1,4 +1,5 @@
 import { useRef, useState, type DragEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card } from './Card'
 import { Icon } from './Icon'
 import { formatEur, formatDate } from '../lib/format'
@@ -20,6 +21,7 @@ function formatSize(bytes: number): string {
 }
 
 function JobRow({ job, onDismiss }: { job: UploadJob; onDismiss: (id: string) => void }) {
+  const navigate = useNavigate()
   const busy = job.stage === 'laden' || job.stage === 'lesen' || job.stage === 'extrahieren'
   const pct = Math.round(job.progress * 100)
 
@@ -71,6 +73,12 @@ function JobRow({ job, onDismiss }: { job: UploadJob; onDismiss: (id: string) =>
       <div className="flex shrink-0 items-center gap-2">
         {job.stage === 'fertig' && job.result && (
           <>
+            <button
+              onClick={() => navigate(`/belege/${job.result!.id}/pruefen`)}
+              className="rounded-lg border border-outline-variant px-2.5 py-1 text-label-sm text-on-surface transition-colors hover:bg-surface-container-low"
+            >
+              Prüfen
+            </button>
             <span
               className="rounded-full px-2.5 py-1 text-label-sm"
               style={

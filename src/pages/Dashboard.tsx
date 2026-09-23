@@ -1,11 +1,12 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '../components/Card'
 import { Icon } from '../components/Icon'
 import { UploadDropzone } from '../components/UploadDropzone'
 import { formatEur } from '../lib/format'
 import { useReceiptUpload } from '../lib/useReceiptUpload'
-import { allReceipts, clearReceipts, type StoredReceipt } from '../lib/db'
+import type { StoredReceipt } from '../lib/db'
+import { useReceipts, removeAllReceipts } from '../lib/store'
 // Loaded lazily and only in development, so it is absent from production builds.
 const DevInspector = lazy(() =>
   import('../components/DevInspector').then((m) => ({ default: m.DevInspector })),
@@ -75,32 +76,38 @@ function Donut({ slices }: { slices: Slice[] }) {
 }
 
 export function Dashboard() {
-  const [stored, setStored] = useState<StoredReceipt[]>([])
-
-  const reload = useCallback(() => {
-    void allReceipts().then(setStored)
-  }, [])
-
-  useEffect(reload, [reload])
-
-  const { jobs, addFiles, dismiss } = useReceiptUpload(reload)
+  const stored = useReceipts()
+  const { jobs, addFiles, dismiss } = useReceiptUpload()
 
   const clearAll = useCallback(async () => {
-    await clearReceipts()
-    reload()
-  }, [reload])
+    await removeAllReceipts()
+  }, [])
 
   const [inspect, setInspect] = useState<StoredReceipt | null>(null)
 
+  // Month shown in the KPIs, as yyyy-mm. Defaults to the current month.
+  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7))
+
+  // Months that actually have receipts, newest first, for the picker.
+  const availableMonths = useMemo(() => {
+    const set = new Set(stored.map((r) => r.date.slice(0, 7)))
+    set.add(new Date().toISOString().slice(0, 7))
+    return [...set].sort().reverse()
+  }, [stored])
+
+  // KPIs are filtered by the receipt's own date — the date the tax office cares
+  // about — not by when the file happened to be uploaded.
+  const inMonth = useMemo(() => stored.filter((r) => r.date.slice(0, 7) === month), [stored, month])
+
   const live = stored.length > 0
-  const liveGross = stored.reduce((s, r) => s + r.gross, 0)
-  const liveVat = stored.reduce((s, r) => s + r.vatAmount, 0)
+  const liveGross = inMonth.reduce((s, r) => s + r.gross, 0)
+  const liveVat = inMonth.reduce((s, r) => s + r.vatAmount, 0)
   const livePending = stored.filter((r) => r.status !== 'geprueft').length
 
   // Category split derived from the stored receipts, largest share first.
   const SLICE_COLORS = ['#0F766E', '#2A9D8F', '#5EC4B6', '#9AD9D0', '#CDE9E5']
   const liveCategories = Object.entries(
-    stored.reduce<Record<string, number>>((acc, r) => {
+    inMonth.reduce<Record<string, number>>((acc, r) => {
       acc[r.category] = (acc[r.category] ?? 0) + r.gross
       return acc
     }, {}),
@@ -127,6 +134,7 @@ export function Dashboard() {
     .sort((a, b) => a[0].localeCompare(b[0]))
     .slice(-6)
     .map(([key, value]) => ({
+      key,
       month: new Date(`${key}-01`).toLocaleDateString('de-DE', { month: 'short' }),
       value,
     }))
@@ -138,15 +146,24 @@ export function Dashboard() {
         <div>
           <h1 className="text-headline-lg text-on-surface">Guten Tag, Batuhan</h1>
           <p className="mt-1 text-body-md text-on-surface-variant">
-            Hier ist Ihre aktuelle GoBD-Finanzübersicht im Steuerjahr 2026.
+            Hier ist Ihre aktuelle GoBD-Finanzübersicht im Steuerjahr {new Date().getFullYear()}.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-label-md text-on-surface transition-colors hover:bg-surface-container-low">
+          <label className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-label-md text-on-surface">
             <Icon name="calendar_month" className="text-[18px]" />
-            September 2026
-            <Icon name="expand_more" className="text-[18px]" />
-          </button>
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="bg-transparent pr-1 text-label-md text-on-surface focus:outline-none"
+            >
+              {availableMonths.map((m) => (
+                <option key={m} value={m}>
+                  {new Date(`${m}-01`).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+                </option>
+              ))}
+            </select>
+          </label>
           <Link
             to="/upload"
             className="flex items-center gap-2 rounded-lg bg-primary-container px-3 py-2 text-label-md text-on-primary shadow-sm transition-opacity hover:opacity-95"
@@ -162,7 +179,7 @@ export function Dashboard() {
         <MetricCard
           label="Ausgaben diesen Monat"
           value={formatEur(liveGross)}
-          hint={`aus ${stored.length} erfassten Belegen`}
+          hint={`aus ${inMonth.length} Beleg(en) in diesem Monat`}
           hintIcon="receipt_long"
           icon="payments"
         />
@@ -175,8 +192,8 @@ export function Dashboard() {
         />
         <MetricCard
           label="Belege"
-          value={String(stored.length)}
-          hint="gesamt im Monat erfasst"
+          value={String(inMonth.length)}
+          hint={`${stored.length} insgesamt im Archiv`}
           icon="receipt_long"
         />
 
@@ -192,7 +209,7 @@ export function Dashboard() {
           <div className="mt-3 flex items-center justify-between gap-2">
             <p className="text-headline-lg tabular-nums text-[#B45309]">{livePending}</p>
             <Link
-              to="/belege"
+              to="/pruefen"
               className="rounded-lg bg-[#D97706] px-3 py-1.5 text-label-sm text-white transition-opacity hover:opacity-95"
             >
               Jetzt prüfen
@@ -224,27 +241,38 @@ export function Dashboard() {
         <Card className="col-span-2">
           <CardHeader
             title="Ausgaben nach Monat"
-            subtitle="Rückblick über die letzten 6 Kalendermonate"
+            subtitle="Zum Wechseln auf einen Monat klicken"
             action={
               <span className="rounded-full bg-secondary-container px-2.5 py-1 text-label-sm text-on-secondary-container">
-                Halbjahr 2026
+                letzte {monthly.length} Monate
               </span>
             }
           />
           <div className="flex h-56 items-end justify-between gap-4 px-2">
-            {monthly.map((m, i) => {
-              const isLast = i === monthly.length - 1
+            {monthly.map((m) => {
+              const isCurrent = m.key === month
               return (
-                <div key={m.month} className="flex flex-1 flex-col items-center gap-2">
-                  {isLast && (
+                <button
+                  key={m.key}
+                  onClick={() => setMonth(m.key)}
+                  className="flex flex-1 flex-col items-center gap-2"
+                  title={`${m.month}: ${formatEur(m.value)}`}
+                >
+                  {isCurrent && (
                     <span className="text-label-sm tabular-nums text-on-surface">{formatEur(m.value)}</span>
                   )}
                   <div
-                    className={`w-full rounded-t-lg ${isLast ? 'bg-primary' : 'bg-secondary-container'}`}
+                    className={`w-full rounded-t-lg transition-colors ${
+                      isCurrent ? 'bg-primary' : 'bg-secondary-container hover:bg-primary/40'
+                    }`}
                     style={{ height: `${(m.value / max) * 170}px` }}
                   />
-                  <span className="text-label-sm text-on-surface-variant">{m.month}</span>
-                </div>
+                  <span
+                    className={`text-label-sm ${isCurrent ? 'font-medium text-on-surface' : 'text-on-surface-variant'}`}
+                  >
+                    {m.month}
+                  </span>
+                </button>
               )
             })}
           </div>
@@ -253,7 +281,7 @@ export function Dashboard() {
         <Card>
           <CardHeader
             title="Nach Kategorie"
-            subtitle="Aufschlüsselung im September"
+            subtitle={`Aufschlüsselung — ${new Date(`${month}-01`).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}`}
             action={<span className="text-label-sm text-on-surface-variant">100 % zugeordnet</span>}
           />
           <div className="flex items-center gap-4">

@@ -1,41 +1,102 @@
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card } from '../components/Card'
 import { Icon } from '../components/Icon'
 import { formatEur } from '../lib/format'
+import { useReceipts } from '../lib/store'
+import { toCsv, toDatev, toSummaryText, downloadText } from '../lib/exporters'
 
-const STEPS = [
-  { n: 1, label: 'Schritt 1', title: 'Zeitraum' },
-  { n: 2, label: 'Schritt 2', title: 'Format & Optionen' },
-  { n: 3, label: 'Abschluss', title: 'Download & Übergabe' },
-]
+type Period = 'monat' | 'quartal' | 'jahr' | 'alle'
+type Format = 'csv' | 'paket' | 'datev'
 
-const FORMATS = [
+const FORMATS: { id: Format; icon: string; title: string; tag: string; badge?: string; desc: string }[] = [
   {
     id: 'csv',
     icon: 'table_view',
     title: 'CSV (Excel)',
-    tag: '.csv / .xlsx',
+    tag: '.csv',
     desc: 'Für eigene Tabellenkalkulation und EÜR-Übersichten. Beinhaltet alle Buchungsdaten, Steuersätze und Notizen.',
   },
   {
-    id: 'pdf',
-    icon: 'picture_as_pdf',
-    title: 'PDF-Paket für Steuerberater',
-    tag: 'ZIP-Archiv',
+    id: 'paket',
+    icon: 'description',
+    title: 'Auswertung + CSV',
+    tag: '.txt + .csv',
     badge: 'Empfohlen',
-    desc: 'Alle Belege als durchsuchbare PDFs, sortiert nach Datum mit vorangestelltem Deckblatt und Summenblatt.',
-    selected: true,
+    desc: 'Eine lesbare Zusammenfassung mit Summen je Kategorie, zusammen mit der vollständigen CSV-Datei.',
   },
   {
     id: 'datev',
     icon: 'account_balance',
     title: 'DATEV-kompatible CSV',
     tag: 'Buchungssatz',
-    badge: 'Pro',
-    desc: 'Direkter Buchungssatz nach SKR03 / SKR04 Kontenrahmen für reibungslose Übergabe an Kanzleien.',
+    desc: 'Buchungssätze nach SKR03-Kontenrahmen für die Übergabe an Kanzleien.',
   },
 ]
 
+/** Start of the period, inclusive. */
+function periodStart(period: Period, now: Date): string {
+  const y = now.getFullYear()
+  if (period === 'jahr') return `${y}-01-01`
+  if (period === 'quartal') {
+    const q = Math.floor(now.getMonth() / 3)
+    return `${y}-${String(q * 3 + 1).padStart(2, '0')}-01`
+  }
+  if (period === 'monat') return `${y}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  return '0000-01-01'
+}
+
 export function Export() {
+  const receipts = useReceipts()
+  const navigate = useNavigate()
+
+  const [period, setPeriod] = useState<Period>('monat')
+  const [format, setFormat] = useState<Format>('paket')
+  const [onlyVerified, setOnlyVerified] = useState(false)
+  const [done, setDone] = useState<string | null>(null)
+
+  const now = new Date()
+  const from = periodStart(period, now)
+
+  const selected = useMemo(() => {
+    return receipts
+      .filter((r) => r.date >= from)
+      .filter((r) => (onlyVerified ? r.status === 'geprueft' : true))
+      .sort((a, b) => a.date.localeCompare(b.date))
+  }, [receipts, from, onlyVerified])
+
+  const net = selected.reduce((s, r) => s + r.net, 0)
+  const vat = selected.reduce((s, r) => s + r.vatAmount, 0)
+  const gross = selected.reduce((s, r) => s + r.gross, 0)
+  const unverified = selected.filter((r) => r.status !== 'geprueft').length
+
+  const periodLabel =
+    period === 'monat'
+      ? now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+      : period === 'quartal'
+        ? `Q${Math.floor(now.getMonth() / 3) + 1} ${now.getFullYear()}`
+        : period === 'jahr'
+          ? String(now.getFullYear())
+          : 'Alle Belege'
+
+  function runExport() {
+    if (selected.length === 0) return
+    const stamp = new Date().toISOString().slice(0, 10)
+
+    if (format === 'csv') {
+      downloadText(`belegio-${stamp}.csv`, toCsv(selected))
+      setDone(`belegio-${stamp}.csv`)
+    } else if (format === 'datev') {
+      downloadText(`belegio-datev-${stamp}.csv`, toDatev(selected))
+      setDone(`belegio-datev-${stamp}.csv`)
+    } else {
+      downloadText(`belegio-auswertung-${stamp}.txt`, toSummaryText(selected, periodLabel), 'text/plain;charset=utf-8')
+      // Give the browser a moment before the second download, or it may drop it.
+      setTimeout(() => downloadText(`belegio-${stamp}.csv`, toCsv(selected)), 600)
+      setDone(`belegio-auswertung-${stamp}.txt + .csv`)
+    }
+  }
+
   return (
     <div className="mx-auto max-w-[1200px] space-y-space-lg">
       <div>
@@ -45,65 +106,42 @@ export function Export() {
         </p>
       </div>
 
-      {/* Stepper */}
-      <Card className="!py-4">
-        <ol className="flex items-center">
-          {STEPS.map((s, i) => {
-            const done = s.n === 1
-            const active = s.n === 2
-            return (
-              <li key={s.n} className="flex flex-1 items-center gap-3">
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-label-sm ${
-                    done
-                      ? 'bg-primary text-white'
-                      : active
-                        ? 'border-2 border-primary text-primary'
-                        : 'border border-outline-variant text-on-surface-variant'
-                  }`}
-                >
-                  {done ? <Icon name="check" className="text-[16px]" /> : s.n}
-                </span>
-                <div className="leading-tight">
-                  <p className="text-label-sm text-on-surface-variant">{s.label}</p>
-                  <p className={`text-label-md ${active || done ? 'text-on-surface' : 'text-on-surface-variant'}`}>
-                    {s.title}
-                  </p>
-                </div>
-                {i < STEPS.length - 1 && <span className="mx-3 h-px flex-1 bg-outline-variant" />}
-              </li>
-            )
-          })}
-        </ol>
-      </Card>
-
       <div className="grid grid-cols-[1fr_360px] gap-space-md">
         <div className="space-y-space-md">
           {/* Step 1 */}
           <Card>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-headline-sm text-on-surface">1. Zeitraum festlegen</h2>
-              <span className="text-label-sm tabular-nums text-on-surface-variant">01.09.2026 – 30.09.2026</span>
+              <span className="text-label-sm tabular-nums text-on-surface-variant">
+                ab {from === '0000-01-01' ? 'Beginn' : from.split('-').reverse().join('.')}
+              </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {['Dieser Monat (Sep 2026)', 'Letztes Quartal (Q2)', 'Jahr 2026'].map((p, i) => (
+              {(
+                [
+                  ['monat', `Dieser Monat (${now.toLocaleDateString('de-DE', { month: 'short', year: 'numeric' })})`],
+                  ['quartal', `Dieses Quartal (Q${Math.floor(now.getMonth() / 3) + 1})`],
+                  ['jahr', `Jahr ${now.getFullYear()}`],
+                  ['alle', 'Alle Belege'],
+                ] as const
+              ).map(([value, label]) => (
                 <button
-                  key={p}
+                  key={value}
+                  onClick={() => {
+                    setPeriod(value)
+                    setDone(null)
+                  }}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-label-md transition-colors ${
-                    i === 0
+                    period === value
                       ? 'bg-primary-container text-on-primary'
                       : 'border border-outline-variant text-on-surface hover:bg-surface-container-low'
                   }`}
                 >
-                  {i === 0 && <Icon name="check" className="text-[16px]" />}
-                  {p}
+                  {period === value && <Icon name="check" className="text-[16px]" />}
+                  {label}
                 </button>
               ))}
             </div>
-            <button className="mt-2 flex items-center gap-1.5 text-label-sm text-primary hover:underline">
-              <Icon name="tune" className="text-[16px]" />
-              Benutzerdefiniert
-            </button>
           </Card>
 
           {/* Step 2 */}
@@ -117,7 +155,7 @@ export function Export() {
                 <label
                   key={f.id}
                   className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-                    f.selected
+                    format === f.id
                       ? 'border-primary bg-secondary-container/40'
                       : 'border-outline-variant hover:bg-surface-container-low'
                   }`}
@@ -125,7 +163,11 @@ export function Export() {
                   <input
                     type="radio"
                     name="format"
-                    defaultChecked={f.selected}
+                    checked={format === f.id}
+                    onChange={() => {
+                      setFormat(f.id)
+                      setDone(null)
+                    }}
                     className="mt-1 text-primary focus:ring-primary"
                   />
                   <Icon name={f.icon} className="mt-0.5 text-[20px] text-primary" />
@@ -149,22 +191,21 @@ export function Export() {
           {/* Step 3 */}
           <Card>
             <h2 className="mb-3 text-headline-sm text-on-surface">3. Einstellungen vor dem Export</h2>
-            <div className="space-y-2">
-              {[
-                { label: 'Belegbilder an PDF anhängen', checked: true },
-                { label: 'Beleg-IDs auf Kassenbons stempeln', checked: true },
-                { label: 'Nur geprüfte Belege exportieren', checked: false },
-              ].map((o) => (
-                <label key={o.label} className="flex cursor-pointer items-center gap-2.5 text-body-md text-on-surface">
-                  <input
-                    type="checkbox"
-                    defaultChecked={o.checked}
-                    className="rounded border-outline text-primary focus:ring-primary"
-                  />
-                  {o.label}
-                </label>
-              ))}
-            </div>
+            <label className="flex cursor-pointer items-center gap-2.5 text-body-md text-on-surface">
+              <input
+                type="checkbox"
+                checked={onlyVerified}
+                onChange={(e) => {
+                  setOnlyVerified(e.target.checked)
+                  setDone(null)
+                }}
+                className="rounded border-outline text-primary focus:ring-primary"
+              />
+              Nur geprüfte Belege exportieren
+            </label>
+            <p className="mt-2 text-body-sm text-on-surface-variant">
+              Belegbilder werden noch nicht mitexportiert — das kommt mit dem PDF-Paket.
+            </p>
           </Card>
         </div>
 
@@ -173,14 +214,14 @@ export function Export() {
           <Card className="!bg-inverse-surface !text-inverse-on-surface">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-headline-sm text-inverse-on-surface">Live-Zusammenfassung</h2>
-              <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-label-sm">Sep 2026</span>
+              <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-label-sm">{periodLabel}</span>
             </div>
 
             <dl className="space-y-3 text-body-md">
               {[
-                ['Anzahl Belege', '37 Belege'],
-                ['Summe Netto', formatEur(1836.78)],
-                ['Umsatzsteuer', formatEur(348.12)],
+                ['Anzahl Belege', `${selected.length} Belege`],
+                ['Summe Netto', formatEur(net)],
+                ['Umsatzsteuer', formatEur(vat)],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-center justify-between border-b border-white/10 pb-2">
                   <dt className="text-white/70">{k}</dt>
@@ -189,37 +230,46 @@ export function Export() {
               ))}
               <div className="flex items-center justify-between pt-1">
                 <dt className="text-label-md">Gesamtbetrag Brutto</dt>
-                <dd className="text-headline-md tabular-nums">{formatEur(2184.9)}</dd>
+                <dd className="text-headline-md tabular-nums">{formatEur(gross)}</dd>
               </div>
             </dl>
 
-            <div className="mt-4 rounded-lg bg-[#D97706]/15 p-3">
-              <p className="flex items-start gap-1.5 text-body-sm text-[#FCD34D]">
-                <Icon name="warning" className="mt-0.5 text-[16px]" />
-                5 Belege noch nicht geprüft. Diese werden mit Status „vorläufig" exportiert.
-              </p>
-              <button className="mt-1.5 text-label-sm text-[#FCD34D] underline">Jetzt vor Export prüfen</button>
-            </div>
+            {unverified > 0 && (
+              <div className="mt-4 rounded-lg bg-[#D97706]/15 p-3">
+                <p className="flex items-start gap-1.5 text-body-sm text-[#FCD34D]">
+                  <Icon name="warning" className="mt-0.5 text-[16px]" />
+                  {unverified} Beleg(e) noch nicht geprüft. Diese werden mit Status „vorläufig" exportiert.
+                </p>
+                <button
+                  onClick={() => navigate('/pruefen')}
+                  className="mt-1.5 text-label-sm text-[#FCD34D] underline"
+                >
+                  Jetzt vor Export prüfen
+                </button>
+              </div>
+            )}
 
-            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-4 py-3 text-label-md text-on-primary transition-opacity hover:opacity-95">
+            <button
+              onClick={runExport}
+              disabled={selected.length === 0}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-4 py-3 text-label-md text-on-primary transition-opacity hover:opacity-95 disabled:opacity-40"
+            >
               <Icon name="download" className="text-[18px]" />
-              Export erstellen (PDF + CSV)
+              {selected.length === 0 ? 'Keine Belege im Zeitraum' : 'Export erstellen'}
             </button>
 
-            <p className="mt-2 text-center text-label-sm text-white/60">Geschätzte Dateigröße: ca. 8,4 MB</p>
+            {done && (
+              <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-label-sm text-[#9CF2E8]">
+                <Icon name="check_circle" className="text-[14px]" />
+                {done} heruntergeladen
+              </p>
+            )}
           </Card>
 
           <Card className="!bg-surface-container-low">
             <p className="flex items-start gap-2 text-body-sm text-on-surface-variant">
               <Icon name="verified_user" className="mt-0.5 text-[18px] text-primary" />
-              Alle Exporte erfüllen die Anforderungen der GoBD für digitale Belegarchivierung.
-            </p>
-          </Card>
-
-          <Card>
-            <p className="text-label-md text-on-surface">Fragen zur DATEV-Übergabe?</p>
-            <p className="mt-1 text-body-sm text-on-surface-variant">
-              Lies unseren Leitfaden für Freiberufler oder teile den Link mit deiner Kanzlei.
+              Die Dateien werden lokal in deinem Browser erzeugt — es werden keine Daten übertragen.
             </p>
           </Card>
         </div>

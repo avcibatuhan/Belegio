@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { recognise } from './ocr'
 import { overallConfidence, parseReceipt } from './parseReceipt'
-import { saveReceipt, type StoredReceipt } from './db'
+import { type StoredReceipt } from './db'
+import { addReceipt } from './store'
 
 export type JobStage = 'warten' | 'laden' | 'lesen' | 'extrahieren' | 'fertig' | 'fehler'
 
@@ -27,7 +28,11 @@ function validate(file: File): string | null {
   return null
 }
 
-export function useReceiptUpload(onSaved?: () => void) {
+export function useReceiptUpload(
+  onSaved?: () => void,
+  /** Defaults to the shared store so every page sees the new receipt. */
+  save: (r: StoredReceipt) => Promise<void> = addReceipt,
+) {
   const [jobs, setJobs] = useState<UploadJob[]>([])
   const urlsRef = useRef<string[]>([])
 
@@ -139,7 +144,7 @@ export function useReceiptUpload(onSaved?: () => void) {
           createdAt: Date.now(),
         }
 
-        await saveReceipt(receipt)
+        await save(receipt)
         update(id, { stage: 'fertig', progress: 1, result: receipt })
         onSaved?.()
       } catch (err) {
@@ -149,7 +154,7 @@ export function useReceiptUpload(onSaved?: () => void) {
         })
       }
     },
-    [onSaved, update],
+    [onSaved, save, update],
   )
 
   const addFiles = useCallback(
