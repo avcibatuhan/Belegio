@@ -38,6 +38,7 @@ exports/
 
 # Development-only notes, not part of the product
 ENTWICKLUNG.md
+NASIL_CALISIR.md
 
 # TypeScript build info
 *.tsbuildinfo

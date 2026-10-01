@@ -58,6 +58,7 @@ function JobRow({ job, onDismiss }: { job: UploadJob; onDismiss: (id: string) =>
           <>
             <p className="mt-0.5 text-body-sm text-on-surface-variant">
               {STAGE_LABEL[job.stage]}
+              {job.detail ? ` (${job.detail})` : ''}
               {busy && pct > 0 ? ` · ${pct} %` : '…'}
             </p>
             <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-surface-container-high">

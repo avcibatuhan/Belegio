@@ -67,7 +67,11 @@ export function DevInspector({ receipt, onClose }: { receipt: StoredReceipt; onC
             <p className="truncate text-sm font-semibold text-slate-900">{receipt.note}</p>
             <p className="text-xs text-slate-500">
               {receipt.merchant} · {receipt.gross.toFixed(2)} € ·{' '}
-              {d ? `OCR ${d.ocrMs} ms · Parser ${d.parseMs} ms` : 'keine Diagnosedaten'}
+              {d
+                ? d.passes
+                  ? `Lesen ${d.ocrMs} ms · ${d.passes.length} Durchgang/Durchgänge · Prüfung: ${d.verification}`
+                  : `OCR ${d.ocrMs} ms · Parser ${d.parseMs ?? 0} ms`
+                : 'keine Diagnosedaten'}
             </p>
           </div>
           <button onClick={onClose} className="rounded p-1.5 text-slate-500 hover:bg-slate-200">
@@ -142,6 +146,7 @@ export function DevInspector({ receipt, onClose }: { receipt: StoredReceipt; onC
                     <th className="py-2">Wert</th>
                     <th className="py-2">Herkunft</th>
                     <th className="py-2">Konfidenz</th>
+                    <th className="py-2" title="Tesseracts eigene Sicherheit für das gelesene Wort">OCR-Wort</th>
                     <th className="py-2">Belegzeile</th>
                   </tr>
                 </thead>
@@ -156,9 +161,39 @@ export function DevInspector({ receipt, onClose }: { receipt: StoredReceipt; onC
                       <td className="py-2 pr-2">
                         <Bar value={f.confidence} />
                       </td>
+                      <td className="py-2 pr-2">
+                        {f.ocrConfidence !== undefined ? <Bar value={f.ocrConfidence} /> : <span className="text-slate-400">—</span>}
+                      </td>
                       <td className="py-2 font-mono text-[11px] text-slate-500">
                         {f.evidence ? `"${f.evidence}"` : '—'}
                       </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {d && tab === 'ablauf' && d.passes && (
+              <table className="mb-4 w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-[11px] uppercase tracking-wide text-slate-500">
+                    <th className="py-1.5">Durchgang</th>
+                    <th className="py-1.5">Prüfung</th>
+                    <th className="py-1.5 text-right">Brutto</th>
+                    <th className="py-1.5 text-right">OCR</th>
+                    <th className="py-1.5 text-right">Bewertung</th>
+                    <th className="py-1.5 text-right">Zeit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.passes.map((p) => (
+                    <tr key={p.name} className={`border-b border-slate-100 ${p.chosen ? 'bg-green-50 font-medium' : ''}`}>
+                      <td className="py-1.5">{p.chosen ? '✓ ' : ''}{p.name}</td>
+                      <td className="py-1.5">{p.verification}</td>
+                      <td className="py-1.5 text-right font-mono">{p.gross}</td>
+                      <td className="py-1.5 text-right">{p.pageConfidence} %</td>
+                      <td className="py-1.5 text-right font-mono">{p.score}</td>
+                      <td className="py-1.5 text-right">{p.ms} ms</td>
                     </tr>
                   ))}
                 </tbody>

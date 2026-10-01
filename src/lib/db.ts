@@ -25,10 +25,18 @@ export type StoredReceipt = {
   rawText: string
   /** Developer diagnostics: how each field was obtained, and the parser's steps. */
   diagnostics?: {
-    fields: Record<string, { value: string; confidence: number; source: string; evidence?: string }>
+    fields: Record<
+      string,
+      { value: string; confidence: number; source: string; evidence?: string; ocrConfidence?: number }
+    >
     trace: string[]
+    /** Whether the amounts were independently confirmed (see parseReceipt.ts). */
+    verification?: string
+    /** One entry per OCR strategy tried; the chosen one is marked. */
+    passes?: { name: string; verification: string; gross: number; pageConfidence: number; score: number; ms: number; chosen: boolean }[]
     ocrMs: number
-    parseMs: number
+    /** Only on receipts read before multi-pass reading existed. */
+    parseMs?: number
   }
   /** Original scan, stored locally so it never leaves the machine. */
   image: Blob

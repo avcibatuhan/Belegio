@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
-import { recognise } from './ocr'
-import { overallConfidence, parseReceipt } from './parseReceipt'
+import { readReceipt } from './readReceipt'
+import { overallConfidence, type ParsedField } from './parseReceipt'
 import { type StoredReceipt } from './db'
 import { addReceipt } from './store'
 
@@ -14,8 +14,15 @@ export type UploadJob = {
   stage: JobStage
   /** 0..1 within the current stage. */
   progress: number
+  /** Extra status, e.g. which reading pass is running. */
+  detail?: string
   error?: string
   result?: StoredReceipt
+}
+
+/** Flattens a parsed field for the developer inspector. */
+function field<T>(f: ParsedField<T>, value: string) {
+  return { value, confidence: f.confidence, source: f.source, evidence: f.evidence, ocrConfidence: f.ocrConfidence }
 }
 
 const MAX_BYTES = 25 * 1024 * 1024
@@ -51,16 +58,13 @@ export function useReceiptUpload(
       try {
         update(id, { stage: 'laden', progress: 0 })
 
-        const ocrStart = performance.now()
-        const text = await recognise(file, (p) => {
-          update(id, { stage: p.phase, progress: p.progress })
+        const { parsed, passes, ocrMs } = await readReceipt(file, (p) => {
+          update(id, {
+            stage: p.phase,
+            progress: p.progress,
+            detail: p.passes > 1 && p.pass > 1 ? `Durchgang ${p.pass}/${p.passes}` : undefined,
+          })
         })
-        const ocrMs = Math.round(performance.now() - ocrStart)
-
-        update(id, { stage: 'extrahieren', progress: 1 })
-        const parseStart = performance.now()
-        const parsed = parseReceipt(text)
-        const parseMs = Math.round(performance.now() - parseStart)
 
         if (parsed.gross.value <= 0) {
           update(id, {
@@ -81,7 +85,7 @@ export function useReceiptUpload(
           net: parsed.net.value,
           vatAmount: parsed.vatAmount.value,
           gross: parsed.gross.value,
-          // Anything uncertain must be confirmed by a human before it counts as verified.
+          // Only independently confirmed amounts may skip human review.
           status: overall >= 0.85 && parsed.arithmeticValid ? 'geprueft' : 'zu-pruefen',
           confidence: {
             merchant: parsed.merchant.confidence,
@@ -94,51 +98,18 @@ export function useReceiptUpload(
           rawText: parsed.rawText,
           diagnostics: {
             fields: {
-              'Händler': {
-                value: parsed.merchant.value || '—',
-                confidence: parsed.merchant.confidence,
-                source: parsed.merchant.source,
-                evidence: parsed.merchant.evidence,
-              },
-              'Datum': {
-                value: parsed.date.value,
-                confidence: parsed.date.confidence,
-                source: parsed.date.source,
-                evidence: parsed.date.evidence,
-              },
-              'Netto': {
-                value: String(parsed.net.value),
-                confidence: parsed.net.confidence,
-                source: parsed.net.source,
-                evidence: parsed.net.evidence,
-              },
-              'MwSt.-Betrag': {
-                value: String(parsed.vatAmount.value),
-                confidence: parsed.vatAmount.confidence,
-                source: parsed.vatAmount.source,
-                evidence: parsed.vatAmount.evidence,
-              },
-              'Brutto': {
-                value: String(parsed.gross.value),
-                confidence: parsed.gross.confidence,
-                source: parsed.gross.source,
-                evidence: parsed.gross.evidence,
-              },
-              'MwSt.-Satz': {
-                value: `${Math.round(parsed.vatRate.value * 100)} %`,
-                confidence: parsed.vatRate.confidence,
-                source: parsed.vatRate.source,
-                evidence: parsed.vatRate.evidence,
-              },
-              'Kategorie': {
-                value: parsed.category,
-                confidence: 1,
-                source: 'berechnet',
-              },
+              'Händler': field(parsed.merchant, parsed.merchant.value || '—'),
+              'Datum': field(parsed.date, parsed.date.value),
+              'Netto': field(parsed.net, String(parsed.net.value)),
+              'MwSt.-Betrag': field(parsed.vatAmount, String(parsed.vatAmount.value)),
+              'Brutto': field(parsed.gross, String(parsed.gross.value)),
+              'MwSt.-Satz': field(parsed.vatRate, `${Math.round(parsed.vatRate.value * 100)} %`),
+              'Kategorie': { value: parsed.category, confidence: 1, source: 'berechnet' },
             },
             trace: parsed.trace,
+            verification: parsed.verification,
+            passes,
             ocrMs,
-            parseMs,
           },
           image: file,
           createdAt: Date.now(),
