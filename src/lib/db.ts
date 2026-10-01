@@ -33,7 +33,7 @@ export type StoredReceipt = {
     /** Whether the amounts were independently confirmed (see parseReceipt.ts). */
     verification?: string
     /** One entry per OCR strategy tried; the chosen one is marked. */
-    passes?: { name: string; verification: string; gross: number; pageConfidence: number; score: number; ms: number; chosen: boolean }[]
+    passes?: { name: string; verification: string; gross: number; pageConfidence: number; score: number; ms: number; chosen: boolean; error?: string }[]
     ocrMs: number
     /** Only on receipts read before multi-pass reading existed. */
     parseMs?: number

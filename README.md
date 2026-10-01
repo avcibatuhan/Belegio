@@ -20,10 +20,9 @@ WebAssembly, so your receipts never leave your machine.
 ---
 
 > [!NOTE]
-> **Project status: early.** Upload and OCR work end to end on the dashboard —
-> drop in a receipt photo and it is read, parsed and stored locally. The other
-> screens still render placeholder data, and export is not implemented yet.
-> See the [roadmap](#roadmap).
+> **Project status: early.** Upload, OCR, review, archive and export work end to
+> end on locally stored data. Recognition has been measured on a small set of
+> real and synthetic receipts only; see the [roadmap](#roadmap).
 
 ---
 
@@ -87,6 +86,9 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
+The first `npm run dev` / `npm run build` downloads the PaddleOCR models
+(~13 MB) into `public/models/` and verifies their SHA-256 checksums.
+
 ### Scripts
 
 | Command | Purpose |
@@ -94,6 +96,8 @@ npm run dev          # http://localhost:5173
 | `npm run dev` | Development server with hot reload |
 | `npm run build` | Type-check and build to `dist/` |
 | `npm run preview` | Serve the production build locally |
+| `npm test` | Unit tests (parser, receipt detection, OCR geometry) |
+| `npm run models` | Download and verify the OCR models (runs automatically) |
 
 ---
 
@@ -103,6 +107,20 @@ npm run dev          # http://localhost:5173
 - **Vite 8** for builds
 - **Tailwind CSS 3** with design tokens generated from the source design system
 - **React Router 7** for routing
+- **IndexedDB** (`idb`) for receipts and images
+
+### How a receipt is read
+
+1. **Find and straighten** — the receipt is located in the photo (bright,
+   colourless sheet → largest four-cornered region) and warped flat, removing
+   the table and any perspective. Plain TypeScript, no OpenCV.
+2. **PaddleOCR (PP-OCRv5)** — a text detector and a Latin-script recogniser,
+   run through **ONNX Runtime Web** (WebAssembly) in a Web Worker.
+3. **Tesseract.js** — an independent second opinion when PaddleOCR's figures do
+   not add up.
+4. **Parsing and verification** — amounts are trusted only when independently
+   read figures agree (net + VAT = total, or VAT matches the printed rate to the
+   cent). Everything else goes to manual review.
 
 No state library, chart library or component framework — the charts are
 hand-written SVG, keeping the dependency surface small (an explicit goal for an
@@ -116,10 +134,11 @@ application that handles tax data).
 belegio/
 ├── design/            Reference designs (screenshots, HTML, DESIGN.md)
 ├── docs/              Screenshots used by this README
+├── scripts/           Model download with checksum verification
 ├── src/
 │   ├── components/    Layout, Sidebar, Topbar, Card, StatusChip, Icon
 │   ├── pages/         The five screens
-│   ├── lib/           de-DE formatting + placeholder data
+│   ├── lib/           OCR pipeline, parser, storage, exports
 │   └── router.tsx
 └── tailwind.config.js Design tokens (generated, not hand-edited)
 ```
@@ -142,10 +161,13 @@ Because Belegio is intended to handle tax records, a few rules are enforced:
   gitignored; `.mcp.json.example` shows the shape without the values.
 - **No receipt data in the repository.** `belege/`, `uploads/`, `scans/` and
   `exports/` are gitignored.
-- **Receipts are never uploaded.** OCR runs in a local WebAssembly worker.
-  The only outbound requests are Tesseract's worker script and German language
-  model, fetched once from a CDN and then cached by the browser; receipt images
-  and extracted data never leave the machine.
+- **Receipts are never uploaded.** OCR runs in local WebAssembly workers.
+  The PaddleOCR models and ONNX runtime are served by the app itself; the only
+  outbound requests are Tesseract's worker script and German language model,
+  fetched once from a CDN and then cached by the browser. Receipt images and
+  extracted data never leave the machine.
+- **Pinned models.** `scripts/fetch-models.mjs` rejects any model file whose
+  SHA-256 does not match the pinned value.
 - **No `dangerouslySetInnerHTML`, `eval` or `innerHTML`** assignments.
 - **Zero dependency vulnerabilities** — verified with `npm audit`.
 
@@ -158,12 +180,14 @@ than a public issue.
 
 - [x] OCR with `tesseract.js` in a Web Worker
 - [x] Persistence via IndexedDB (receipts + images)
-- [ ] Wire the archive, review and upload screens to stored data
+- [x] Archive, review, upload and settings screens on stored data
+- [x] Exports: CSV, DATEV-style booking batch (SKR03)
+- [x] Receipt detection and perspective correction
+- [x] PaddleOCR (PP-OCRv5) via ONNX Runtime Web
+- [x] Unit tests (`npm test`)
+- [ ] Several VAT rates on one receipt
 - [ ] PDF receipt support
-- [ ] Real exports: CSV, PDF bundle, DATEV (SKR03 / SKR04)
 - [ ] ZUGFeRD / XRechnung parsing
-- [ ] Settings screen
-- [ ] Automated tests
 
 ---
 
@@ -180,3 +204,6 @@ while code, comments and documentation are in English.
 ## Licence
 
 [MIT](LICENSE)
+
+The PaddleOCR models (PP-OCRv5, downloaded at build time, not part of this
+repository) are © PaddlePaddle Authors under the Apache License 2.0.

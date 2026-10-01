@@ -189,7 +189,9 @@ export function DevInspector({ receipt, onClose }: { receipt: StoredReceipt; onC
                   {d.passes.map((p) => (
                     <tr key={p.name} className={`border-b border-slate-100 ${p.chosen ? 'bg-green-50 font-medium' : ''}`}>
                       <td className="py-1.5">{p.chosen ? '✓ ' : ''}{p.name}</td>
-                      <td className="py-1.5">{p.verification}</td>
+                      <td className="py-1.5" title={p.error}>
+                        {p.error ? <span className="text-red-700">fehlgeschlagen</span> : p.verification}
+                      </td>
                       <td className="py-1.5 text-right font-mono">{p.gross}</td>
                       <td className="py-1.5 text-right">{p.pageConfidence} %</td>
                       <td className="py-1.5 text-right font-mono">{p.score}</td>

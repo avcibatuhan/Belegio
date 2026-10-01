@@ -45,3 +45,6 @@ NASIL_CALISIR.md
 
 # Tesseract language model (downloaded at runtime / cached by browser)
 *.traineddata
+
+# PaddleOCR models (fetched and checksum-verified by scripts/fetch-models.mjs)
+public/models/

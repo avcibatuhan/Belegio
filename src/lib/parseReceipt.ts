@@ -238,7 +238,8 @@ function parseDate(text: string): ParsedField<string> {
   const today = new Date().toISOString().slice(0, 10)
 
   // dd.mm.yyyy / dd.mm.yy — by far the most common on German receipts.
-  const dotted = text.match(/\b(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})\b/)
+  // The year may run straight into the time when OCR drops the space: "04.01.202010:14:40".
+  const dotted = text.match(/\b(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4}(?=\d{1,2}:\d{2})|\d{2,4}\b)/)
   if (dotted) {
     const day = Number(dotted[1])
     const month = Number(dotted[2])
@@ -276,7 +277,13 @@ function parseMerchant(lines: Line[]): ParsedField<string> {
     if (!/[A-Za-zÄÖÜäöüß]{3}/.test(t)) continue
 
     // Drop specks read as a lone letter before a wide gap: "A      ARAL Tankstelle".
-    const cleaned = t.replace(/[*|_]+/g, '').replace(/^(\S\s{2,})+/, '').trim()
+    const cleaned = t
+      .replace(/[*|_]+/g, '')
+      .replace(/^(\S\s{2,})+/, '')
+      // A speck read as lone punctuation between words: "REWE Markt : GmbH".
+      .replace(/\s+[:;.,'`]+(?=\s)/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
     if (cleaned) {
       // A legal-form suffix is a strong hint we found the real name.
       const strong = /\b(GmbH|AG|KG|OHG|e\.K\.|UG|SE|mbH|Inc\.?|Ltd\.?)\b/i.test(cleaned)
@@ -337,7 +344,7 @@ const TENDER = /gegeben|r[uü]ckgeld|zur[uü]ck/i
 /** "Steuer-Nr. 12/345/67890", "USt-IdNr." — identifiers, not tax amounts. */
 const TAX_ID = /steuer\s*-?\s*(nr|nummer)|st\.?\s*-?\s*nr|ust\s*-?\s*id/i
 
-const GROSS_LABEL = /gesamt|summe|total|zu\s*zahlen|endbetrag|bar\b|ec[\s-]?card/i
+const GROSS_LABEL = /gesamt|summe|total|brutto|zu\s*zahlen|endbetrag|bar\b|ec[\s-]?card/i
 /** Tolerates a damaged first letter: OCR has returned "uetto" for "Netto". */
 const NET_LABEL = /\b\S?etto\b|nettobetrag/i
 const VAT_LABEL = /m\Sst\b|\bust\b|umsatzsteuer|steuer|19\s*%|7\s*%/i
@@ -352,6 +359,89 @@ const VAT_EXCLUDE = new RegExp(`${SUBTOTAL.source}|${NET_LABEL.source}|${TAX_ID.
 
 /** Below this, Tesseract's own confidence in a word is treated as unreliable. */
 const WEAK_WORD = 0.7
+
+// ─── Tax tables ───────────────────────────────────────────────────────────
+
+/** Column headings of the tax summary table many tills print. */
+const COLUMN: [keyof TableHits, RegExp][] = [
+  ['vat', /^(steuer|m\Sst|ust)\b/i],
+  ['net', /^\S?etto\b/i],
+  ['gross', /^(brutto|umsatz)\b/i],
+]
+type TableHits = { net?: AmountHit; vat?: AmountHit; gross?: AmountHit }
+
+const centerX = (b: Bbox) => (b.x0 + b.x1) / 2
+
+/**
+ * Reads a tax table: a heading row of column names with the figures in the
+ * row beneath, e.g.
+ *
+ *     MwSt.%   Steuer:   Netto   Brutto
+ *     7% Mwst.  0,62 €   8,75 €  9,37 €
+ *
+ * Read line by line, every label sees the whole value row and picks the wrong
+ * figure. Each heading is matched to the figure below it instead: by x
+ * position when the OCR gave word positions, else by order when the counts
+ * agree. A heading with "%" is the rate column and carries no amount.
+ *
+ * Tables with one row per VAT rate are left alone: one row alone would be a
+ * partial figure, and the parser handles one rate only.
+ */
+function findTaxTable(lines: Line[]): TableHits {
+  for (let i = 0; i + 1 < lines.length; i++) {
+    const header = lines[i]
+    if (header.text.match(MONEY)) continue
+
+    const tokens = header.words.length
+      ? header.words.map((w) => ({ text: w.text, x: centerX(w.bbox) as number | undefined }))
+      : header.text.split(/\s+/).map((text) => ({ text, x: undefined as number | undefined }))
+    const columns = tokens
+      .filter((t) => !t.text.includes('%'))
+      .flatMap((t) => {
+        const kind = COLUMN.find(([, re]) => re.test(t.text))?.[0]
+        return kind ? [{ kind, x: t.x }] : []
+      })
+    if (new Set(columns.map((c) => c.kind)).size < 2) continue
+
+    const row = lines[i + 1]
+    const figures = moneyIn(row)
+    if (figures.length < 2) continue
+    const after = lines[i + 2]
+    if (after && moneyIn(after).length >= 2 && /%/.test(after.text)) return {}
+
+    const hits: TableHits = {}
+    const describe = `${header.text} ⏎ ${row.text}`
+    if (columns.every((c) => c.x !== undefined) && figures.every((f) => f.x !== undefined)) {
+      const free = [...figures]
+      for (const col of columns) {
+        free.sort((a, b) => Math.abs(a.x! - col.x!) - Math.abs(b.x! - col.x!))
+        const f = free.shift()
+        if (f) hits[col.kind] = { value: f.value, line: describe, ocrConfidence: f.ocrConfidence, how: 'Tabelle' }
+      }
+    } else if (columns.length === figures.length) {
+      columns.forEach((col, k) => {
+        hits[col.kind] = { value: figures[k].value, line: describe, ocrConfidence: figures[k].ocrConfidence, how: 'Tabelle' }
+      })
+    }
+    return hits
+  }
+  return {}
+}
+
+/** Money amounts on a line, with x positions when the OCR provided words. */
+function moneyIn(line: Line): { value: number; x?: number; ocrConfidence?: number }[] {
+  if (line.words.length) {
+    return line.words.flatMap((w) => {
+      const token = fixDigits(w.text).text.match(MONEY)?.[0]
+      const value = token ? parseGermanAmount(token) : null
+      return value ? [{ value, x: centerX(w.bbox), ocrConfidence: w.confidence / 100 }] : []
+    })
+  }
+  return (line.text.match(MONEY) ?? []).flatMap((t) => {
+    const value = parseGermanAmount(t)
+    return value ? [{ value }] : []
+  })
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────
 
@@ -404,9 +494,12 @@ export function parseReceipt(rawText: string, layout?: OcrLine[]): ParsedReceipt
       : 'Kein Datum gefunden — heutiges Datum eingesetzt.',
   )
 
-  const netHit = findLabelledAmounts(lines, NET_LABEL)[0] ?? null
-  const vatHit = findLabelledAmounts(lines, VAT_LABEL, VAT_EXCLUDE)[0] ?? null
-  const grossHits = findLabelledAmounts(lines, GROSS_LABEL, GROSS_EXCLUDE)
+  // A tax table states net and VAT unambiguously; labelled lines are the fallback.
+  const table = findTaxTable(lines)
+  const netHit = table.net ?? findLabelledAmounts(lines, NET_LABEL)[0] ?? null
+  const vatHit = table.vat ?? findLabelledAmounts(lines, VAT_LABEL, VAT_EXCLUDE)[0] ?? null
+  // The total line ("Summe", "Total") is preferred; the table's gross column backs it up.
+  const grossHits = [...findLabelledAmounts(lines, GROSS_LABEL, GROSS_EXCLUDE), ...(table.gross ? [table.gross] : [])]
 
   // The total can never be smaller than the net amount or the tax on it.
   const floor = Math.max(netHit?.value ?? 0, vatHit?.value ?? 0)
@@ -521,16 +614,20 @@ export function parseReceipt(rawText: string, layout?: OcrLine[]): ParsedReceipt
     vatSource === 'gelesen' &&
     grossSource === 'gelesen' &&
     rateSource === 'gelesen' &&
-    Math.abs((gross * vatRate) / (1 + vatRate) - vatAmount) < 0.02
+    // VAT is printed rounded to the cent, so a correct pair is never more than half a cent off.
+    Math.abs((gross * vatRate) / (1 + vatRate) - vatAmount) < 0.011
   const sane = gross >= net && gross >= vatAmount
 
+  // When all three were read, their sum decides: a matching rate cannot
+  // outvote it. (A misread total like 89,58 for 89,50 still fits the rate
+  // within a cent, but not net + VAT.)
   const verification: Verification =
     gross <= 0
       ? 'keine'
-      : sane && (sumMatches || rateMatches)
-        ? 'bestaetigt'
-        : !sane || (allRead && !sumMatches)
-          ? 'widerspruch'
+      : !sane || (allRead && !sumMatches)
+        ? 'widerspruch'
+        : sumMatches || rateMatches
+          ? 'bestaetigt'
           : 'abgeleitet'
 
   trace.push(

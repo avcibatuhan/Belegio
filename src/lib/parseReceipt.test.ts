@@ -162,3 +162,73 @@ test('low OCR word confidence lowers an unverified amount', () => {
   assert.ok(p.gross.confidence <= 0.41)
   assert.ok(p.trace.some((t) => t.startsWith('Unsicher gelesen')))
 })
+
+// ─── Tax tables and real-receipt regressions ──────────────────────────────
+
+test('regression: tax table maps each heading to the figure below it', () => {
+  // Real receipt (Dorfladen): every label used to take the last figure of the row.
+  const layout = [
+    line([word('Dringenberger', 20, 10), word('Dorfladen', 200, 10), word('UG', 330, 10)]),
+    line([word('MwSt.%', 100, 300), word('Steuer:', 290, 300), word('Netto', 545, 300), word('Brutto', 760, 300)]),
+    line([word('7%', 70, 340), word('Mwst.', 140, 340), word('0,62', 285, 340), word('€', 375, 340),
+      word('8,75', 525, 340), word('€', 613, 340), word('9,37', 747, 340), word('€', 836, 340)]),
+    line([word('Total:', 480, 400), word('9,37', 746, 400)]),
+  ]
+  const p = parseReceipt(layout.map((l) => l.text).join('\n'), layout)
+  assert.equal(p.vatAmount.value, 0.62)
+  assert.equal(p.net.value, 8.75)
+  assert.equal(p.gross.value, 9.37)
+  assert.equal(p.verification, 'bestaetigt')
+})
+
+test('tax table without word positions is matched by order', () => {
+  const p = parseReceipt(lines('Firma GmbH', 'MwSt.%  Steuer  Netto  Brutto', '19%  1,60  8,40  10,00', 'Summe 10,00'))
+  assert.equal(p.vatAmount.value, 1.6)
+  assert.equal(p.net.value, 8.4)
+  assert.equal(p.verification, 'bestaetigt')
+})
+
+test('a table with one row per VAT rate is not read as a single rate', () => {
+  const p = parseReceipt(lines(
+    'REWE Markt GmbH', 'MwSt  Netto  Steuer  Brutto', 'A 7%  10,00  0,70  10,70', 'B 19%  20,00  3,80  23,80', 'SUMME 34,50',
+  ))
+  assert.notEqual(p.verification, 'bestaetigt')
+  assert.equal(p.gross.value, 34.5)
+})
+
+test('date glued to the time is still read', () => {
+  // PaddleOCR dropped the space: "04.01.2020 10:14:40" → "04.01.202010:14:40".
+  assert.equal(parseReceipt(lines('Firma GmbH', 'Datum: 04.01.202010:14:40', 'Summe 9,37')).date.value, '2020-01-04')
+})
+
+test('regression: real pharmacy receipt as PaddleOCR reads it is verified', () => {
+  const p = parseReceipt(lines(
+    'Feld-Apotheke', 'Frau Cunkenheimer', 'Gordonstrasse 2', '21079 Hamburg',
+    '04172784 1 *      1.50 EUR      1.50', 'Summe EUR      8.84', 'Nettobetrag      EUR      7.43',
+    'MWST 19.0%      EUR      1,41', 'Gegeben      Bar      EUR      14.00', 'zurück      EUR      5.16',
+    'Steuernummer      4764100684', '13.09.2018      16:06      Kasse 1',
+  ))
+  assert.equal(p.gross.value, 8.84)
+  assert.equal(p.net.value, 7.43)
+  assert.equal(p.vatAmount.value, 1.41)
+  assert.equal(p.date.value, '2018-09-13')
+  assert.equal(p.verification, 'bestaetigt')
+})
+
+test('regression: a misread total that fits the rate but not net + VAT is a contradiction', () => {
+  // Low-res photo: "89,50" read as "89,58". 89,58 × 19/119 = 14,30 ≈ 14,29, but 75,21 + 14,29 ≠ 89,58.
+  const p = parseReceipt(lines('ARAL Tankstelle', 'SUMME EUR 89,58', 'MwSt 19% 14,29', 'Netto 75,21'))
+  assert.equal(p.verification, 'widerspruch')
+})
+
+test('rate check allows only cent rounding', () => {
+  // 89,50 × 19/119 = 14,2899 → 14,29 ✓
+  assert.equal(parseReceipt(lines('Bäckerei Schmidt', 'SUMME EUR 89,50', 'MwSt 19% 14,29')).verification, 'bestaetigt')
+  // 89,58 × 19/119 = 14,3027 — more than half a cent from 14,29, so not proof (the old 2-cent tolerance accepted it)
+  assert.notEqual(parseReceipt(lines('Bäckerei Schmidt', 'SUMME EUR 89,58', 'MwSt 19% 14,29')).verification, 'bestaetigt')
+})
+
+test('merchant: lone punctuation specks between words are dropped', () => {
+  assert.equal(parseReceipt(lines('REWE Markt : GmbH', 'SUMME 49,80')).merchant.value, 'REWE Markt GmbH')
+  assert.equal(parseReceipt(lines('Feld-Apotheke', 'SUMME 8,84')).merchant.value, 'Feld-Apotheke')
+})
