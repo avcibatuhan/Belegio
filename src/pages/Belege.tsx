@@ -281,12 +281,12 @@ export function Belege() {
               </th>
               <th className="w-20 py-3">Vorschau</th>
               <th className="py-3">
-                <button onClick={() => sortBy('merchant')} className="flex items-center gap-1 hover:text-on-surface">
+                <button onClick={() => sortBy('merchant')} className="flex items-center gap-1 uppercase tracking-[0.05em] hover:text-on-surface">
                   Händler <SortArrow k="merchant" />
                 </button>
               </th>
               <th className="w-28 py-3">
-                <button onClick={() => sortBy('date')} className="flex items-center gap-1 hover:text-on-surface">
+                <button onClick={() => sortBy('date')} className="flex items-center gap-1 uppercase tracking-[0.05em] hover:text-on-surface">
                   Datum <SortArrow k="date" />
                 </button>
               </th>
@@ -294,11 +294,11 @@ export function Belege() {
               <th className="w-24 py-3 text-right">MwSt.-Satz</th>
               <th className="w-28 py-3 text-right">Netto</th>
               <th className="w-28 py-3 text-right">
-                <button onClick={() => sortBy('gross')} className="ml-auto flex items-center gap-1 hover:text-on-surface">
+                <button onClick={() => sortBy('gross')} className="ml-auto flex items-center gap-1 uppercase tracking-[0.05em] hover:text-on-surface">
                   Brutto <SortArrow k="gross" />
                 </button>
               </th>
-              <th className="w-32 py-3">Status</th>
+              <th className="w-36 py-3 pl-5">Status</th>
               <th className="w-10 py-3" />
             </tr>
           </thead>
@@ -337,7 +337,7 @@ export function Belege() {
                   <td className="text-right tabular-nums text-on-surface-variant">{formatVatRate(r.vatRate)}</td>
                   <td className="text-right tabular-nums text-on-surface">{formatEur(r.net)}</td>
                   <td className="text-right font-medium tabular-nums text-on-surface">{formatEur(r.gross)}</td>
-                  <td className="pl-2">
+                  <td className="pl-5">
                     <StatusChip status={r.status} />
                   </td>
                   <td>

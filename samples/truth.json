@@ -1,0 +1,66 @@
+{
+ "01-baeckerei.png": {
+  "merchant": "Bäckerei Sonnenkorn",
+  "date": "2026-10-01",
+  "net": 11.59,
+  "vatAmount": 0.81,
+  "gross": 12.4,
+  "vatRate": 0.07
+ },
+ "02-tankstelle.jpg": {
+  "merchant": "Tankstelle Nordring GmbH",
+  "date": "2026-10-01",
+  "net": 79.26,
+  "vatAmount": 15.06,
+  "gross": 94.32,
+  "vatRate": 0.19
+ },
+ "03-buerobedarf.png": {
+  "merchant": "Büro Profi GmbH",
+  "date": "2026-10-02",
+  "net": 73.03,
+  "vatAmount": 13.87,
+  "gross": 86.9,
+  "vatRate": 0.19
+ },
+ "04-hosting.png": {
+  "merchant": "Cloudwerk Hosting GmbH",
+  "date": "2026-09-15",
+  "net": 24.0,
+  "vatAmount": 4.56,
+  "gross": 28.56,
+  "vatRate": 0.19
+ },
+ "05-cafe.jpg": {
+  "merchant": "Café Morgenrot",
+  "date": "2026-09-24",
+  "net": 20.0,
+  "vatAmount": 3.8,
+  "gross": 23.8,
+  "vatRate": 0.19
+ },
+ "06-fahrkarte.png": {
+  "merchant": "Nordexpress Reisen GmbH",
+  "date": "2026-09-18",
+  "net": 46.64,
+  "vatAmount": 3.26,
+  "gross": 49.9,
+  "vatRate": 0.07
+ },
+ "07-mobilfunk.png": {
+  "merchant": "Mobilfunk Plus GmbH",
+  "date": "2026-09-03",
+  "net": 33.61,
+  "vatAmount": 6.38,
+  "gross": 39.99,
+  "vatRate": 0.19
+ },
+ "08-hofladen.jpg": {
+  "merchant": "Hofladen Wiesengrund UG",
+  "date": "2026-08-27",
+  "net": 17.29,
+  "vatAmount": 1.21,
+  "gross": 18.5,
+  "vatRate": 0.07
+ }
+}

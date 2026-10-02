@@ -1,209 +1,242 @@
 <div align="center">
 
-# Belegio
+# 🧾 Belegio
 
-**Receipt scanning and tax export for German freelancers — entirely in your browser.**
+### Receipt scanning and tax export for German freelancers. Entirely in your browser.
 
-Belegio digitises receipts and invoices, extracts the tax-relevant fields, and
-produces GoBD-compliant exports for your accountant. OCR runs client-side via
-WebAssembly, so your receipts never leave your machine.
+Photograph a receipt. Belegio finds it, straightens it, reads it, checks the
+maths and files it, **without the image ever leaving your computer.**
 
-[![build](https://img.shields.io/badge/build-passing-brightgreen)](#development)
-[![vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-brightgreen)](#security)
+[![tests](https://img.shields.io/badge/tests-38%20passing-brightgreen)](#-testing)
+[![vulnerabilities](https://img.shields.io/badge/vulnerabilities-0-brightgreen)](#-privacy--security)
+[![local-first](https://img.shields.io/badge/100%25-local-0F766E)](#-privacy--security)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6)](https://www.typescriptlang.org)
-[![Vite](https://img.shields.io/badge/Vite-8-646cff)](https://vite.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)](https://www.typescriptlang.org)
 [![licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
+
+<br>
+
+<img src="docs/pipeline.png" alt="A photographed receipt is found, straightened, read by OCR and checked: net 79,26 € + VAT 15,06 € = 94,32 €" width="100%">
+
+<sub>Every step above runs on your device. The receipt shown is one of the fictional samples in <a href="samples/"><code>samples/</code></a>.</sub>
 
 </div>
 
 ---
 
+## ✨ What it does
+
+- **📸 Reads phone photos.** It finds the receipt on the table, corrects the perspective and reads the text with **PaddleOCR**, a deep-learning OCR engine running in WebAssembly.
+- **🧮 Checks the maths.** Net + VAT must equal the total, using figures that were *actually read*. Anything that doesn't add up goes to you for review. It never guesses silently.
+- **🗂️ Organises everything.** Archive with search, filters and bulk actions. Categories are assigned automatically and you can change them.
+- **📤 Exports for your accountant.** CSV, a readable summary, and a DATEV-style booking batch (SKR03).
+- **🔒 Stays private.** No server, no account, no tracking. Receipts live in your browser's IndexedDB.
+
 > [!NOTE]
-> **Project status: early.** Upload, OCR, review, archive and export work end to
-> end on locally stored data. Recognition has been measured on a small set of
-> real and synthetic receipts only; see the [roadmap](#roadmap).
+> The interface is in **German**, because it is built for German tax workflows (GoBD, Vorsteuer, DATEV). The code and documentation are in English.
 
 ---
 
-## Screenshots
+## 📷 Screenshots
 
-### Dashboard
-![Dashboard](docs/screenshot-dashboard.png)
+### Übersicht (dashboard)
+Monthly spending, deductible input tax and receipts waiting for review, all computed from your stored receipts.
 
-### Receipt archive
-![Receipt archive](docs/screenshot-belege.png)
+![Dashboard](docs/dashboard.png)
 
-### Tax export
-![Tax export](docs/screenshot-export.png)
+<table>
+<tr>
+<td width="50%">
+
+**Upload:** drop several files at once; each is read in turn
+
+<img src="docs/upload.png" alt="Upload queue with three receipts read and one in progress">
+
+</td>
+<td width="50%">
+
+**Archive:** search, filter by category, VAT rate or status
+
+<img src="docs/belege.png" alt="Receipt archive with eight receipts">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Review:** the scan beside the extracted fields, with a confidence for each field
+
+<img src="docs/review.png" alt="Review screen with a photographed café receipt and its extracted fields">
+
+</td>
+<td width="50%">
+
+**Export:** choose a period and format, with a live summary
+
+<img src="docs/export.png" alt="Export wizard with live summary">
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Why Belegio
+## 🔍 How a receipt is read
 
-German bookkeeping rules ([GoBD][gobd]) require receipts to be archived in a
-complete, unalterable and traceable way. Most tools solve this by uploading your
-receipts to a server — which means handing your tax records to a third party.
+```
+ Photo ─► 1. Find & straighten ─► 2. PaddleOCR ─► 3. Parse fields ─► 4. Verify ─► IndexedDB
+                                   │ (figures don't add up?)
+                                   └─► Tesseract as a second opinion
+```
 
-Belegio takes the opposite approach: **everything runs locally.** Receipts are
-processed in the browser and never transmitted anywhere. The application code
-makes no network calls at all.
-
-| | |
-|---|---|
-| **Local-first** | OCR and extraction run in-browser through WebAssembly |
-| **GoBD-oriented** | Structured for complete, auditable receipt archiving |
-| **DATEV-ready** | Exports to SKR03 / SKR04 for handover to your accountant |
-| **VAT aware** | Handles 19 % / 7 % / 0 %, input tax and gross/net validation |
-| **German UI** | Written for German tax workflows, `de-DE` formatting throughout |
-
-[gobd]: https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Weitere_Steuerthemen/Abgabenordnung/2019-11-28-GoBD.html
-
----
-
-## Screens
-
-| Route | Screen | What it does |
+| Step | What happens | Where |
 |---|---|---|
-| `/` | **Übersicht** | KPIs from your real receipts, plus **working upload + OCR** |
-| `/upload` | **Beleg hochladen** | Batch upload with a 4-stage pipeline: crop → OCR → extract → verify |
-| `/pruefen` | **Beleg prüfen** | Scan viewer beside extracted fields, with per-field confidence |
-| `/belege` | **Belegarchiv** | Filterable archive, bulk actions, VAT and totals |
-| `/export` | **Export** | Three-step wizard: period → format → options |
-| `/einstellungen` | **Einstellungen** | Placeholder — not yet designed |
+| **1. Find & straighten** | The receipt is the brightest four-cornered region in the photo. Its corners are mapped onto an upright rectangle (perspective correction). If nothing paper-like is found, nothing is cropped. | [`rectify.ts`](src/lib/rectify.ts) |
+| **2. Read** | **PaddleOCR PP-OCRv5** runs in a Web Worker via ONNX Runtime Web: a detector finds the text lines, a recogniser reads them (Latin script incl. `ä ö ü ß €`). | [`paddleWorker.ts`](src/lib/paddleWorker.ts) |
+| **3. Parse** | Finds merchant, date, net, VAT and total, and tolerates typical OCR damage (`Zuischensumme`, `4S,8O`). Tax tables (`Steuer │ Netto │ Brutto`) are matched by column. | [`parseReceipt.ts`](src/lib/parseReceipt.ts) |
+| **4. Verify** | Only figures read from the receipt count as evidence: net + VAT = total, or VAT matches the printed rate to within half a cent. Receipts that pass with high confidence are approved automatically; everything else waits for you. | [`parseReceipt.ts`](src/lib/parseReceipt.ts) |
+
+If PaddleOCR's figures don't add up, **Tesseract** reads the receipt again as an independent second opinion. The read with the best evidence wins.
+
+**Measured accuracy** (fields: merchant, date, net, VAT, total, rate):
+
+| Test set | Fields correct | Amounts correct | Wrong amount auto-approved |
+|---|---|---|---|
+| 8 fictional samples in [`samples/`](samples/) (5 scans, 3 photos) | **48 / 48** | 24 / 24 | 0 |
+| 2 real receipts + 8 synthetic photos, from sharp to blurry | **57 / 60** | 30 / 30 | 0 |
+
+The three misses are dates on very blurry, low-resolution photos, where `0` and `8` can't be told apart. Those receipts get today's date, marked as *guessed*, and go to review. These are small test sets. Real-world accuracy on curled, faded thermal paper will be lower.
 
 ---
 
-## Getting started
+## 🚀 Getting started
 
-Requires **Node.js 20+** (developed against Node 24).
+Requires **Node.js 20+**.
 
 ```bash
 git clone https://github.com/<your-username>/belegio.git
 cd belegio
-
 npm install
-npm run dev          # http://localhost:5173
+npm run dev            # → http://localhost:5173
 ```
 
-The first `npm run dev` / `npm run build` downloads the PaddleOCR models
-(~13 MB) into `public/models/` and verifies their SHA-256 checksums.
+The first `npm run dev` downloads the OCR models (~13 MB) into `public/models/` and checks their SHA-256 checksums. After that, everything works offline except Tesseract's language model, which is fetched once and then cached by the browser.
 
-### Scripts
+**Try it:** drag the files from [`samples/`](samples/) onto the Übersicht page.
 
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Development server with hot reload |
+| `npm run dev` | Development server with hot reload and the developer inspector |
 | `npm run build` | Type-check and build to `dist/` |
-| `npm run preview` | Serve the production build locally |
-| `npm test` | Unit tests (parser, receipt detection, OCR geometry) |
+| `npm run preview` | Serve the production build |
+| `npm test` | Run the unit tests |
 | `npm run models` | Download and verify the OCR models (runs automatically) |
 
----
-
-## Tech stack
-
-- **React 18** + **TypeScript 5.9** in strict mode
-- **Vite 8** for builds
-- **Tailwind CSS 3** with design tokens generated from the source design system
-- **React Router 7** for routing
-- **IndexedDB** (`idb`) for receipts and images
-
-### How a receipt is read
-
-1. **Find and straighten** — the receipt is located in the photo (bright,
-   colourless sheet → largest four-cornered region) and warped flat, removing
-   the table and any perspective. Plain TypeScript, no OpenCV.
-2. **PaddleOCR (PP-OCRv5)** — a text detector and a Latin-script recogniser,
-   run through **ONNX Runtime Web** (WebAssembly) in a Web Worker.
-3. **Tesseract.js** — an independent second opinion when PaddleOCR's figures do
-   not add up.
-4. **Parsing and verification** — amounts are trusted only when independently
-   read figures agree (net + VAT = total, or VAT matches the printed rate to the
-   cent). Everything else goes to manual review.
-
-No state library, chart library or component framework — the charts are
-hand-written SVG, keeping the dependency surface small (an explicit goal for an
-application that handles tax data).
+> [!TIP]
+> In `npm run dev`, click any receipt under *Gespeicherte Belege* on the dashboard to open the **developer inspector**. It shows each field's source (*read / calculated / guessed / missing*), the receipt line it came from, every OCR pass, and the raw OCR text. It is not included in production builds.
 
 ---
 
-## Project structure
+## 🔒 Privacy & security
+
+Belegio handles tax records, so a few rules are enforced:
+
+- **Receipts are never uploaded.** OCR runs in local WebAssembly workers. The PaddleOCR models and the ONNX runtime are served by the app itself. The only external request is Tesseract's German language model (~2 MB, once).
+- **Pinned models.** [`scripts/fetch-models.mjs`](scripts/fetch-models.mjs) rejects any model file whose SHA-256 checksum doesn't match the pinned value.
+- **No secrets or receipt data in the repository.** `.env*`, `.mcp.json`, `belege/`, `uploads/`, `scans/` and `exports/` are gitignored. The images in `samples/` are invented.
+- **No `dangerouslySetInnerHTML`, `eval` or `innerHTML`.**
+- **Zero known dependency vulnerabilities** (`npm audit`).
+
+> [!WARNING]
+> Because everything is stored in your browser, **clearing your browser data deletes your receipts.** Back up regularly via *Einstellungen → Daten als CSV sichern*. Belegio supports GoBD-oriented record keeping, but it is not a certified archiving system. Check with your tax advisor.
+
+If you find a security problem, please open a private security advisory instead of a public issue.
+
+---
+
+## 🧱 Tech stack
+
+| | |
+|---|---|
+| **UI** | React 18 · TypeScript (strict) · Vite 8 · Tailwind CSS 3 · React Router 7 |
+| **OCR** | [PaddleOCR PP-OCRv5](https://github.com/PaddlePaddle/PaddleOCR) via [ONNX Runtime Web](https://onnxruntime.ai/) · [Tesseract.js](https://github.com/naptha/tesseract.js) |
+| **Image processing** | Receipt detection, Otsu thresholding and the perspective warp in plain TypeScript (no OpenCV) |
+| **Storage** | IndexedDB via [`idb`](https://github.com/jakearchibald/idb) |
+| **Tests** | Node's built-in test runner via `tsx` |
+
+There is no state library, component framework or chart library: the charts are hand-written SVG. Keeping third-party code small is a deliberate choice for an app that handles tax data.
+
+<details>
+<summary><b>Project structure</b></summary>
 
 ```
 belegio/
-├── design/            Reference designs (screenshots, HTML, DESIGN.md)
-├── docs/              Screenshots used by this README
-├── scripts/           Model download with checksum verification
-├── src/
-│   ├── components/    Layout, Sidebar, Topbar, Card, StatusChip, Icon
-│   ├── pages/         The five screens
-│   ├── lib/           OCR pipeline, parser, storage, exports
-│   └── router.tsx
-└── tailwind.config.js Design tokens (generated, not hand-edited)
+├── samples/              Fictional demo receipts to try the app with
+├── scripts/              Model download (checksum-pinned), sample generator
+├── docs/                 Screenshots for this README
+├── design/               Reference designs and the "Precision Fiscal" design system
+└── src/
+    ├── pages/            Übersicht, Upload, Belege, Prüfen, Export, Einstellungen
+    ├── components/       Layout, upload dropzone, developer inspector, …
+    └── lib/
+        ├── rectify.ts        find the receipt + perspective warp
+        ├── preprocess.ts     decode, straighten, grayscale for Tesseract
+        ├── readReceipt.ts    reading passes, choosing the best read
+        ├── paddle*.ts        PaddleOCR worker (detector + recogniser)
+        ├── textBoxes.ts      OCR geometry: boxes, CTC decoding, line grouping
+        ├── ocr.ts            Tesseract worker
+        ├── parseReceipt.ts   text → fields, verification
+        ├── db.ts · store.ts  IndexedDB storage and shared state
+        └── exporters.ts      CSV, summary, DATEV-style batch
 ```
 
-### Design system
-
-The visual language comes from a design system named **“Precision Fiscal”**:
-teal `#0F766E`, Inter, 12 px corner radius, tabular figures for all monetary
-values. Tokens live in [`tailwind.config.js`](tailwind.config.js) and are
-generated from the design export rather than written by hand — see
-[`design/README.md`](design/README.md) before changing colours.
+</details>
 
 ---
 
-## Security
+## 🧪 Testing
 
-Because Belegio is intended to handle tax records, a few rules are enforced:
+```bash
+npm test
+```
 
-- **No secrets in the repository.** `.mcp.json`, `.env` and `providers.json` are
-  gitignored; `.mcp.json.example` shows the shape without the values.
-- **No receipt data in the repository.** `belege/`, `uploads/`, `scans/` and
-  `exports/` are gitignored.
-- **Receipts are never uploaded.** OCR runs in local WebAssembly workers.
-  The PaddleOCR models and ONNX runtime are served by the app itself; the only
-  outbound requests are Tesseract's worker script and German language model,
-  fetched once from a CDN and then cached by the browser. Receipt images and
-  extracted data never leave the machine.
-- **Pinned models.** `scripts/fetch-models.mjs` rejects any model file whose
-  SHA-256 does not match the pinned value.
-- **No `dangerouslySetInnerHTML`, `eval` or `innerHTML`** assignments.
-- **Zero dependency vulnerabilities** — verified with `npm audit`.
+38 unit tests cover the parser, receipt detection and the OCR geometry. Many of them are regressions taken from real misreads:
 
-If you find a security problem, please open a private security advisory rather
-than a public issue.
+- an OCR-damaged `Zwischensumme` being taken as the total
+- a misread total (`89,58` instead of `89,50`) that matched the VAT rate but not net + VAT
+- a tax table where every label grabbed the last figure in the row
+- a date glued to the time (`04.01.202010:14:40`)
+- a tilted photo where the label and the amount ended up on different lines
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [x] OCR with `tesseract.js` in a Web Worker
-- [x] Persistence via IndexedDB (receipts + images)
-- [x] Archive, review, upload and settings screens on stored data
-- [x] Exports: CSV, DATEV-style booking batch (SKR03)
+- [x] Local OCR with PaddleOCR and Tesseract
 - [x] Receipt detection and perspective correction
-- [x] PaddleOCR (PP-OCRv5) via ONNX Runtime Web
-- [x] Unit tests (`npm test`)
-- [ ] Several VAT rates on one receipt
-- [ ] PDF receipt support
-- [ ] ZUGFeRD / XRechnung parsing
+- [x] Verification using independently read figures only
+- [x] Archive, review, export and settings screens
+- [x] CSV and DATEV-style export (SKR03)
+- [ ] Several VAT rates on one receipt (7 % **and** 19 %)
+- [ ] PDF invoices via text extraction (no OCR needed)
+- [ ] ZUGFeRD / XRechnung e-invoices
+- [ ] Receipt images in the export (PDF bundle)
+- [ ] Blur warning while taking the photo
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Issues and pull requests are welcome. Please run `npm run build` before opening a
-PR — the build type-checks in strict mode and must pass.
+Issues and pull requests are welcome. Before opening a PR, please run:
 
-Note that the UI is German by design; user-facing strings should stay in German,
-while code, comments and documentation are in English.
+```bash
+npm test && npm run build
+```
 
----
+User-facing text stays in German, while code, comments and docs are in English. Design tokens in [`tailwind.config.js`](tailwind.config.js) are generated from the design export. See [`design/README.md`](design/README.md) before changing colours.
 
-## Licence
+## 📄 Licence
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Belegio contributors
 
-The PaddleOCR models (PP-OCRv5, downloaded at build time, not part of this
-repository) are © PaddlePaddle Authors under the Apache License 2.0.
+Third-party models, downloaded at build time and not part of this repository: PaddleOCR PP-OCRv5 (© PaddlePaddle Authors) and the Tesseract language data are both licensed under **Apache 2.0**.

@@ -115,10 +115,10 @@ export function Topbar() {
 
         <div className="ml-2 flex items-center gap-2 border-l border-outline-variant pl-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-container text-label-sm font-semibold text-on-primary">
-            BK
+            BA
           </div>
           <div className="leading-tight">
-            <span className="block text-label-sm font-medium text-on-surface">Batuhan K.</span>
+            <span className="block text-label-sm font-medium text-on-surface">Batuhan A.</span>
             <span className="block text-label-sm text-on-surface-variant">Freiberufler</span>
           </div>
         </div>

@@ -66,7 +66,8 @@ export function Einstellungen() {
           {[
             ['lock', 'Belegbilder und extrahierte Daten verlassen den Rechner nie.'],
             ['cloud_off', 'Keine Server-Uploads, keine Konten, kein Tracking.'],
-            ['download', 'Einzige Netzwerkanfrage: das Sprachmodell der Texterkennung (einmalig, ~2 MB).'],
+            ['memory', 'Texterkennung läuft lokal: PaddleOCR-Modelle (~13 MB) liefert Belegio selbst aus.'],
+            ['download', 'Einzige externe Anfrage: das Tesseract-Sprachmodell (einmalig, ~2 MB, danach im Cache).'],
             ['storage', 'Speicherort ist die IndexedDB dieses Browserprofils.'],
           ].map(([icon, text]) => (
             <li key={text} className="flex items-start gap-2">

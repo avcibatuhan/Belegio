@@ -418,7 +418,7 @@ export function Review() {
           </Card>
 
           {/* Action bar */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 [&>button]:whitespace-nowrap">
             <button
               onClick={() => setConfirmDelete(true)}
               className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-2.5 text-label-md text-error transition-colors hover:bg-error-container"
